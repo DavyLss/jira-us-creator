@@ -437,6 +437,8 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.all_priorities = [
             "Bloquant", "Majeur", "Mineure"
         ]
+        self.all_components = {}
+        self.active_sprint = None
         self._task_ops_after = None
         self._ticket_type_after = None
         self._ust_type_after = None
@@ -643,15 +645,41 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             self, height=120, width=150)
         self.priority_dropdown.place_forget()
 
-        # --- Row 12 : Bouton ---
+        # --- Row 12 : Composants ---
+        ctk.CTkLabel(self, text="Composant:").grid(
+            row=12, column=0, padx=20, pady=8, sticky="w")
+        self.component_var = ctk.StringVar()
+        self.component_entry = ctk.CTkEntry(
+            self, width=200, textvariable=self.component_var,
+            placeholder_text="Sélectionnez d'abord un projet...")
+        self.component_entry.grid(row=12, column=1, padx=10, pady=8, sticky="w")
+        self.component_entry.bind("<KeyRelease>", self._filter_components)
+        self.component_entry.bind("<FocusIn>",
+                                  lambda e: self.after(100, self._show_component_dd, sorted(self.all_components.keys()) if self.all_components else []))
+        self.component_entry.bind("<FocusOut>",
+                                  lambda e: self.after(200, self._hide_component_dd))
+        self.component_dropdown = ctk.CTkScrollableFrame(
+            self, height=120, width=200)
+        self.component_dropdown.place_forget()
+
+        # --- Row 13 : Sprint actif ---
+        self.sprint_var = ctk.BooleanVar(value=False)
+        self.sprint_cb = ctk.CTkCheckBox(
+            self, text="Ajouter au sprint actif",
+            variable=self.sprint_var)
+        self.sprint_cb.grid(row=13, column=0, columnspan=2, padx=20, pady=5, sticky="w")
+        self.sprint_lbl = ctk.CTkLabel(self, text="", text_color="gray", font=ctk.CTkFont(size=10))
+        self.sprint_lbl.grid(row=13, column=2, padx=10, pady=5, sticky="w")
+
+        # --- Row 14 : Bouton ---
         self.create_btn = ctk.CTkButton(
             self, text="Créer la User Story",
             command=self._create_us, fg_color="#2b6cb0", hover_color="#2c5282")
-        self.create_btn.grid(row=12, column=0, columnspan=3, padx=20, pady=15)
+        self.create_btn.grid(row=14, column=0, columnspan=3, padx=20, pady=15)
 
-        # --- Row 13 : Résultat ---
+        # --- Row 15 : Résultat ---
         self.result_frame = ctk.CTkFrame(self)
-        self.result_frame.grid(row=13, column=0, columnspan=3, padx=20, pady=5,
+        self.result_frame.grid(row=15, column=0, columnspan=3, padx=20, pady=5,
                                sticky="we")
 
     # ============================================================
@@ -820,6 +848,41 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                   placeholder_text="Tapez pour chercher une Feature...")
         self._hide_epic_dd()
         self._render_epic_favs()
+        self.component_var.set("")
+        self.all_components = {}
+        self.component_entry.configure(placeholder_text="Chargement...")
+        self.sprint_var.set(False)
+        self.active_sprint = None
+        self.sprint_lbl.configure(text="")
+        proj_key = self.all_projects.get(value, "")
+        if proj_key:
+            threading.Thread(target=self._do_load_components_and_sprint,
+                             args=(proj_key,), daemon=True).start()
+
+    def _do_load_components_and_sprint(self, proj_key):
+        try:
+            comps = self.jira.get_components(proj_key)
+            comp_dict = {}
+            comp_names = []
+            for c in comps:
+                name = c.get("name", "")
+                comp_dict[name] = c.get("id")
+                comp_names.append(name)
+            sprint = self.jira.get_active_sprint(proj_key)
+            self.after(0, self._components_and_sprint_loaded, comp_names, comp_dict, sprint)
+        except Exception as e:
+            self.after(0, self._components_error, str(e))
+
+    def _components_and_sprint_loaded(self, comp_names, comp_dict, sprint):
+        self.all_components = comp_dict
+        self.component_entry.configure(placeholder_text="Tapez pour chercher...")
+        if sprint:
+            self.active_sprint = sprint
+            self.sprint_lbl.configure(text=sprint.get("name", ""))
+            self.sprint_var.set(True)
+
+    def _components_error(self, err):
+        self.component_entry.configure(placeholder_text="Erreur chargement")
 
     def _search_epics(self, search_text=""):
         self._epic_search_thread = None
@@ -1194,6 +1257,52 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self._hide_priority_dd()
 
     # ============================================================
+    # COMPOSANTS
+    # ============================================================
+
+    def _filter_components(self, event=None):
+        if event and event.keysym == "Escape":
+            self._hide_component_dd()
+            return
+        if event and event.keysym == "Return":
+            items = [w.cget("text") for w in self.component_dropdown.winfo_children() if w.cget("text")]
+            if items:
+                self._select_component(items[0])
+            return
+        if event and event.keysym in ("Up", "Down"):
+            return
+        search = self.component_var.get().lower().strip()
+        if not search:
+            self._show_component_dd(sorted(self.all_components.keys()))
+            return
+        filtered = sorted(c for c in self.all_components.keys() if search in c.lower())
+        if filtered:
+            self._show_component_dd(filtered)
+        else:
+            self._hide_component_dd()
+
+    def _show_component_dd(self, items):
+        for w in self.component_dropdown.winfo_children():
+            w.destroy()
+        for item in items:
+            btn = ctk.CTkButton(
+                self.component_dropdown, text=item, anchor="w",
+                command=lambda t=item: self._select_component(t),
+                fg_color="transparent", text_color=("black", "white"),
+                hover_color="#3a7bc8", height=25)
+            btn.pack(fill="x", pady=1)
+        self.component_dropdown.place(in_=self.component_entry, x=0, rely=1, relx=0,
+                                      y=3, anchor="nw")
+        self.component_dropdown.lift()
+
+    def _hide_component_dd(self):
+        self.component_dropdown.place_forget()
+
+    def _select_component(self, label):
+        self.component_var.set(label)
+        self._hide_component_dd()
+
+    # ============================================================
     # TÂCHE OPS
     # ============================================================
 
@@ -1277,22 +1386,26 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         if ev:
             feature_key = self.all_epics.get(ev)
 
+        component = self.component_var.get().strip() if self.component_var.get() else None
+        sprint_id = self.active_sprint.get("id") if self.sprint_var.get() and self.active_sprint else None
+
         self.create_btn.configure(state="disabled", text="Création en cours...")
         self._show_status("Création en cours...", "blue")
         assignee = self.jira.user
         threading.Thread(target=self._do_create,
                          args=(proj_key, title, desc, ticket_type, ust_type, task_ops,
-                               story_points, priority, feature_key, assignee),
+                               story_points, priority, feature_key, assignee, component, sprint_id),
                          daemon=True).start()
 
-    def _do_create(self, pk, title, desc, tt, ut, to, sp, prio, fk, assignee):
+    def _do_create(self, pk, title, desc, tt, ut, to, sp, prio, fk, assignee, component, sprint_id):
         import logging
         try:
-            logging.debug("Creating US: pk=%s tt=%s ut=%s to=%s sp=%s prio=%s fk=%s assignee=%s",
-                          pk, tt, ut, to, sp, prio, fk, assignee)
+            logging.debug("Creating US: pk=%s tt=%s ut=%s to=%s sp=%s prio=%s fk=%s assignee=%s comp=%s sprint=%s",
+                          pk, tt, ut, to, sp, prio, fk, assignee, component, sprint_id)
             ok, key, err = self.jira.create_user_story(
                 pk, title, desc, ticket_type=tt, ust_type=ut, task_ops=to,
-                story_points=sp, priority=prio, feature_key=fk, assignee=assignee)
+                story_points=sp, priority=prio, feature_key=fk, assignee=assignee,
+                component=component, sprint_id=sprint_id)
             logging.debug("Create result: ok=%s key=%s", ok, key)
         except Exception as e:
             logging.exception("Create exception")

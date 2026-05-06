@@ -165,6 +165,16 @@ class JiraConfigFrame(ctk.CTkFrame):
             chk.project_key = key
             chk.grid(row=i, column=0, padx=5, pady=2, sticky="w")
 
+    def _on_fav_change(self, *args):
+        if not self.auto_save_var.get():
+            return
+        favs = []
+        for widget in self.proj_frame.winfo_children():
+            if isinstance(widget, ctk.CTkCheckBox) and hasattr(widget, "project_key") and widget.var.get():
+                favs.append(widget.project_key)
+        self.config["favorite_projects"] = favs
+        save_config(self.config)
+
     def _uninstall(self):
         import sys
         import subprocess

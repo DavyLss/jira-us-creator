@@ -35,7 +35,7 @@ if exist "*.spec" del /Q "*.spec"
 python -m PyInstaller ^
     --onefile ^
     --noconsole ^
-    --name "Jira US Creator" ^
+    --name "JiraUSCreator" ^
     main.py
 
 if errorlevel 1 (
@@ -50,7 +50,7 @@ echo ========================================
 echo  Build termine avec succes !
 echo ========================================
 echo.
-echo L'executable est disponible dans: dist\Jira US Creator.exe
+echo L'executable est disponible dans: dist\JiraUSCreator.exe
 echo.
 echo Pour distribuer: copiez ce fichier .exe a l'utilisateur.
 echo Il peut le placer ou il veut et le lancer directement.

@@ -174,6 +174,19 @@ class JiraConfigFrame(ctk.CTkFrame):
             root.destroy()
             subprocess.Popen([sys.executable, "--uninstall"])
 
+
+class SPEstimatorPopup(ctk.CTkToplevel):
+    def __init__(self, master, on_result=None):
+        super().__init__(master)
+        self.title("Estimateur Story Points")
+        self.geometry("500x520")
+        self.resizable(False, False)
+        self.transient(master)
+        self.grab_set()
+        self.on_result = on_result
+        self.calculated_sp = None
+        self._build()
+
     def _build(self):
         self.grid_columnconfigure(1, weight=1)
 

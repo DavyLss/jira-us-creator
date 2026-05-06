@@ -75,6 +75,12 @@ class JiraConfigFrame(ctk.CTkFrame):
                         variable=self.auto_save_var).grid(
             row=9, column=0, columnspan=3, padx=20, pady=5, sticky="w")
 
+        self.uninstall_btn = ctk.CTkButton(
+            self, text="Désinstaller", width=120,
+            command=self._uninstall,
+            fg_color="#c0392b", hover_color="#e74c3c")
+        self.uninstall_btn.grid(row=10, column=0, columnspan=3, padx=20, pady=10)
+
         self._populate_projects()
 
     def _toggle_token(self):
@@ -158,58 +164,14 @@ class JiraConfigFrame(ctk.CTkFrame):
             chk.project_key = key
             chk.grid(row=i, column=0, padx=5, pady=2, sticky="w")
 
-    def _on_fav_change(self, *args):
-        if not self.auto_save_var.get():
-            return
-        favs = []
-        for widget in self.proj_frame.winfo_children():
-            if isinstance(widget, ctk.CTkCheckBox) and hasattr(widget, "project_key") and widget.var.get():
-                favs.append(widget.project_key)
-        self.config["favorite_projects"] = favs
-        save_config(self.config)
-
-
-class HelpInfoPopup(ctk.CTkToplevel):
-    def __init__(self, master, title, content):
-        super().__init__(master)
-        self.title(title)
-        self.geometry("420x300")
-        self.resizable(False, False)
-        self.transient(master)
-        self.grab_set()
-        ctk.CTkLabel(self, text=title, font=ctk.CTkFont(size=16, weight="bold")).pack(
-            padx=20, pady=10, anchor="w")
-        txt = ctk.CTkTextbox(self, wrap="word", height=200)
-        txt.pack(fill="both", expand=True, padx=20)
-        txt.insert("1.0", content)
-        txt.configure(state="disabled")
-        ctk.CTkButton(self, text="Fermer", command=self.destroy, width=80).pack(pady=8)
-
-        self.update_idletasks()
-        x = master.winfo_rootx() + (master.winfo_width() - self.winfo_width()) // 2
-        y = master.winfo_rooty() + (master.winfo_height() - self.winfo_height()) // 2
-        self.geometry(f"+{x}+{y}")
-
-
-class SPEstimatorPopup(ctk.CTkToplevel):
-    def __init__(self, master, on_result=None):
-        super().__init__(master)
-        self.on_result = on_result
-        self.title("Aide pour estimer ma Jira..")
-        self.geometry("520x420")
-        self.resizable(False, False)
-        self.transient(master)
-        self.grab_set()
-        self._build()
-        self.center()
-
-    def center(self):
-        self.update_idletasks()
-        w = self.winfo_width()
-        h = self.winfo_height()
-        x = self.master.winfo_rootx() + (self.master.winfo_width() - w) // 2
-        y = self.master.winfo_rooty() + (self.master.winfo_height() - h) // 2
-        self.geometry(f"+{x}+{y}")
+    def _uninstall(self):
+        import sys
+        import subprocess
+        from tkinter import messagebox
+        if messagebox.askyesno("Désinstaller", "Voulez-vous vraiment désinstaller Jira US Creator ?\n\nCela supprimera le raccourci bureau et les données locales."):
+            root = self.winfo_toplevel()
+            root.destroy()
+            subprocess.Popen([sys.executable, "--uninstall"])
 
     def _build(self):
         self.grid_columnconfigure(1, weight=1)
@@ -480,15 +442,20 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             self.jira = JiraAPI(url, token, verify)
             ok, user, _ = self.jira.test_connection()
             if ok:
-                self.after(0, lambda: self.result_lbl.configure(
-                    text=f"Connecté en tant que {user}", text_color="green"))
+                self.after(0, lambda: self._show_status(
+                    f"Connecté en tant que {user}", "green"))
+                self._load_all_projects()
+                self._load_template()
             else:
-                self.after(0, lambda: self.result_lbl.configure(
-                    text="Erreur de connexion — vérifiez la configuration", text_color="red"))
-            self._load_all_projects()
-            self._load_template()
+                self.after(0, lambda: self._show_status(
+                    "Erreur de connexion — vérifiez la configuration", "red"))
         self._render_proj_favs()
         self._render_epic_favs()
+
+    def _show_status(self, text, color):
+        for w in self.result_frame.winfo_children():
+            w.destroy()
+        ctk.CTkLabel(self.result_frame, text=text, text_color=color).pack()
 
     def _build(self):
         self.grid_columnconfigure(1, weight=1)
@@ -718,7 +685,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         search = self.proj_var.get().lower().strip()
         if not search:
             favs = set(self.config.get("favorite_projects", []))
-            fav_list = sorted(f"{k} - {n} ★" for k, n in self._all_proj_keys if k in favs)
+            fav_list = sorted(f"{k} - {n}" for k, n in self._all_proj_keys if k in favs)
             other = sorted(f"{k} - {n}" for k, n in self._all_proj_keys if k not in favs)
             ordered = fav_list + other
             self._show_proj_dd(ordered[:50])
@@ -1297,7 +1264,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             feature_key = self.all_epics.get(ev)
 
         self.create_btn.configure(state="disabled", text="Création en cours...")
-        self.result_lbl.configure(text_color="blue", text="Création...")
+        self._show_status("Création en cours...", "blue")
         assignee = self.jira.user
         threading.Thread(target=self._do_create,
                          args=(proj_key, title, desc, ticket_type, ust_type, task_ops,
@@ -1305,9 +1272,17 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                          daemon=True).start()
 
     def _do_create(self, pk, title, desc, tt, ut, to, sp, prio, fk, assignee):
-        ok, key, err = self.jira.create_user_story(
-            pk, title, desc, ticket_type=tt, ust_type=ut, task_ops=to,
-            story_points=sp, priority=prio, feature_key=fk, assignee=assignee)
+        import logging
+        try:
+            logging.debug("Creating US: pk=%s tt=%s ut=%s to=%s sp=%s prio=%s fk=%s assignee=%s",
+                          pk, tt, ut, to, sp, prio, fk, assignee)
+            ok, key, err = self.jira.create_user_story(
+                pk, title, desc, ticket_type=tt, ust_type=ut, task_ops=to,
+                story_points=sp, priority=prio, feature_key=fk, assignee=assignee)
+            logging.debug("Create result: ok=%s key=%s", ok, key)
+        except Exception as e:
+            logging.exception("Create exception")
+            ok, key, err = False, None, str(e)
         self.after(0, self._create_done, ok, key, err)
 
     def _create_done(self, ok, key, err):

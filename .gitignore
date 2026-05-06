@@ -4,3 +4,6 @@ __pycache__/
 venv/
 jira_output.txt
 test_*.py
+dist/
+build/
+*.spec

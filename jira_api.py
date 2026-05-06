@@ -62,7 +62,36 @@ class JiraAPI:
             return resp.json().get("issues", [])
         return []
 
-    def create_user_story(self, project_key, summary, description, ticket_type="User Story", ust_type=None, task_ops=None, story_points=None, priority=None, feature_key=None, assignee=None):
+    def get_components(self, project_key):
+        url = f"{self.url}/rest/api/2/project/{project_key}/components"
+        resp = requests.get(url, headers=self.headers,
+                            verify=self.verify, timeout=15)
+        if resp.status_code == 200:
+            return resp.json()
+        return []
+
+    def get_active_sprint(self, project_key):
+        try:
+            boards_url = f"{self.url}/rest/agile/1.0/board?projectKeyOrId={project_key}"
+            boards_resp = requests.get(boards_url, headers=self.headers,
+                                       verify=self.verify, timeout=15)
+            if boards_resp.status_code != 200:
+                return None
+            boards = boards_resp.json().get("values", [])
+            for board in boards:
+                if board.get("type") == "scrum":
+                    sprint_url = f"{self.url}/rest/agile/1.0/board/{board['id']}/sprint?state=active"
+                    sprint_resp = requests.get(sprint_url, headers=self.headers,
+                                               verify=self.verify, timeout=15)
+                    if sprint_resp.status_code == 200:
+                        sprints = sprint_resp.json().get("values", [])
+                        if sprints:
+                            return sprints[0]
+        except Exception:
+            pass
+        return None
+
+    def create_user_story(self, project_key, summary, description, ticket_type="User Story", ust_type=None, task_ops=None, story_points=None, priority=None, feature_key=None, assignee=None, component=None, sprint_id=None):
         url = f"{self.url}/rest/api/2/issue"
         payload = {
             "fields": {
@@ -87,6 +116,12 @@ class JiraAPI:
 
         if feature_key:
             payload["fields"]["customfield_12950"] = feature_key
+
+        if component:
+            payload["fields"]["components"] = [{"name": component}]
+
+        if sprint_id:
+            payload["fields"]["customfield_11750"] = sprint_id
 
         resp = requests.post(url, headers=self.headers,
                              json=payload, verify=self.verify, timeout=30)

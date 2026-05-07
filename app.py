@@ -3,6 +3,12 @@ from tkinter import messagebox
 from config import load_config, save_config
 from jira_api import JiraAPI
 import threading
+import urllib.request
+import json
+
+APP_VERSION = "1.0.0"
+GITHUB_RELEASES_URL = "https://api.github.com/repos/DavyLss/jira-us-creator/releases/latest"
+GITHUB_RELEASES_PAGE = "https://github.com/DavyLss/jira-us-creator/releases/latest"
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
@@ -70,16 +76,22 @@ class JiraConfigFrame(ctk.CTkFrame):
         self.load_projects_btn.grid(row=8, column=0, columnspan=3, padx=20,
                                     pady=5)
 
+        self.update_btn = ctk.CTkButton(
+            self, text="Vérifier les mises à jour", width=180,
+            command=lambda: check_for_updates(self),
+            fg_color="#5b8af5", hover_color="#3a6fd4")
+        self.update_btn.grid(row=9, column=0, columnspan=3, padx=20, pady=5)
+
         self.auto_save_var = ctk.BooleanVar(value=True)
         ctk.CTkCheckBox(self, text="Sauvegarde automatique",
                         variable=self.auto_save_var).grid(
-            row=9, column=0, columnspan=3, padx=20, pady=5, sticky="w")
+            row=10, column=0, columnspan=3, padx=20, pady=5, sticky="w")
 
         self.uninstall_btn = ctk.CTkButton(
             self, text="Désinstaller", width=120,
             command=self._uninstall,
             fg_color="#c0392b", hover_color="#e74c3c")
-        self.uninstall_btn.grid(row=10, column=0, columnspan=3, padx=20, pady=10)
+        self.uninstall_btn.grid(row=11, column=0, columnspan=3, padx=20, pady=10)
 
         self._populate_projects()
 
@@ -183,6 +195,97 @@ class JiraConfigFrame(ctk.CTkFrame):
             root = self.winfo_toplevel()
             root.destroy()
             subprocess.Popen([sys.executable, "--uninstall"])
+
+
+class UpdateCheckPopup(ctk.CTkToplevel):
+    def __init__(self, master, current_version, latest_version, download_url, notes=""):
+        super().__init__(master)
+        self.title("Mise à jour disponible")
+        self.geometry("450x350")
+        self.resizable(False, False)
+        self.transient(master)
+        self.grab_set()
+        self._build(current_version, latest_version, download_url, notes)
+        self.lift()
+        self.focus_force()
+
+    def _build(self, current_version, latest_version, download_url, notes):
+        ctk.CTkLabel(self, text="Nouvelle version disponible",
+                     font=ctk.CTkFont(size=18, weight="bold"),
+                     text_color="#4ade80").pack(pady=(20, 5))
+
+        ctk.CTkLabel(self, text=f"Version actuelle : {current_version}",
+                     text_color="gray").pack(pady=2)
+        ctk.CTkLabel(self, text=f"Dernière version : {latest_version}",
+                     text_color="#4ade80",
+                     font=ctk.CTkFont(size=16, weight="bold")).pack(pady=2)
+
+        if notes:
+            ctk.CTkTextbox(self, height=120, width=380, state="normal",
+                           corner_radius=8).pack(padx=20, pady=15, fill="x")
+            txt = self.nametowidget(self.winfo_children()[-2].winfo_name()) if hasattr(self.nametowidget(self.winfo_children()[-2].winfo_name()), 'insert') else None
+            tb = self.winfo_children()[-1]
+            tb.configure(state="normal")
+            tb.insert("1.0", notes)
+            tb.configure(state="disabled")
+
+        ctk.CTkButton(
+            self, text="Télécharger", fg_color="#4ade80", hover_color="#22c55e",
+            text_color="#000", font=ctk.CTkFont(weight="bold"),
+            command=lambda: self._open_url(download_url)).pack(pady=10)
+        ctk.CTkButton(
+            self, text="Plus tard", text_color="gray",
+            fg_color="transparent", hover_color="gray",
+            command=self.destroy).pack()
+
+    def _open_url(self, url):
+        import webbrowser
+        webbrowser.open(url)
+        self.destroy()
+
+
+class UpToDatePopup(ctk.CTkToplevel):
+    def __init__(self, master, version):
+        super().__init__(master)
+        self.title("Mise à jour")
+        self.geometry("350x180")
+        self.resizable(False, False)
+        self.transient(master)
+        self.grab_set()
+        ctk.CTkLabel(self, text="Vous êtes à jour",
+                     font=ctk.CTkFont(size=18, weight="bold"),
+                     text_color="#4ade80").pack(pady=(30, 10))
+        ctk.CTkLabel(self, text=f"Version {version} - Dernière version installée",
+                     text_color="gray").pack()
+        ctk.CTkButton(self, text="OK", command=self.destroy).pack(pady=20)
+        self.lift()
+        self.focus_force()
+
+
+def check_for_updates(master, callback=None):
+    def _do_check():
+        try:
+            req = urllib.request.Request(GITHUB_RELEASES_URL)
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode())
+                latest_tag = data.get("tag_name", "").lstrip("v")
+                download_url = data.get("html_url", GITHUB_RELEASES_PAGE)
+                notes = data.get("body", "")
+                if latest_tag and _newer_version(latest_tag, APP_VERSION):
+                    master.after(0, lambda: UpdateCheckPopup(
+                        master, APP_VERSION, latest_tag, download_url, notes))
+                elif callback:
+                    master.after(0, lambda: UpToDatePopup(master, APP_VERSION))
+        except Exception as e:
+            master.after(0, lambda: messagebox.showerror(
+                "Erreur", f"Impossible de vérifier les mises à jour :\n{e}"))
+    threading.Thread(target=_do_check, daemon=True).start()
+
+
+def _newer_version(latest, current):
+    def _parse(v):
+        return [int(x) for x in v.split(".")]
+    return _parse(latest) > _parse(current)
 
 
 class HelpInfoPopup(ctk.CTkToplevel):
@@ -1499,6 +1602,8 @@ class JiraUSApp(ctk.CTk):
         has_token = bool(self.config.get("jira_token", "").strip())
         if has_token:
             self.tabview.set("Créer User Story")
+
+        self.after(3000, lambda: check_for_updates(self, callback=True))
 
     def _on_close(self):
         url = self.config_frame.url_entry.get().strip()

@@ -185,6 +185,24 @@ class JiraConfigFrame(ctk.CTkFrame):
             subprocess.Popen([sys.executable, "--uninstall"])
 
 
+class HelpInfoPopup(ctk.CTkToplevel):
+    def __init__(self, master, title, message):
+        super().__init__(master)
+        self.title(title)
+        self.geometry("400x300")
+        self.resizable(False, False)
+        self.transient(master)
+        self.grab_set()
+        self._build(message)
+        self.lift()
+        self.focus_force()
+
+    def _build(self, message):
+        ctk.CTkLabel(self, text=message, wraplength=350, justify="left").pack(
+            padx=20, pady=15, fill="both", expand=True)
+        ctk.CTkButton(self, text="Fermer", command=self.destroy).pack(pady=10)
+
+
 class SPEstimatorPopup(ctk.CTkToplevel):
     def __init__(self, master, on_result=None):
         super().__init__(master)
@@ -196,6 +214,8 @@ class SPEstimatorPopup(ctk.CTkToplevel):
         self.on_result = on_result
         self.calculated_sp = None
         self._build()
+        self.lift()
+        self.focus_force()
 
     def _build(self):
         self.grid_columnconfigure(1, weight=1)
@@ -215,7 +235,7 @@ class SPEstimatorPopup(ctk.CTkToplevel):
             values=["< 2h", "< 3h30", "< 14h (2j)", "< 28h (4j)", "≤ 35h (5j)", "> 35h"])
         self.time_combo.pack(side="left")
         ctk.CTkButton(
-            f, text="📖", width=24, height=24,
+            f, text="💡", width=24, height=24,
             command=lambda: HelpInfoPopup(
                 self, "Temps estimé",
                 "Combien de temps cela va-t-il prendre sans interruption ?\n\n"
@@ -240,7 +260,7 @@ class SPEstimatorPopup(ctk.CTkToplevel):
             values=["Tout", "Presque tout", "Quelque chose", "Presque rien", "Rien / inconnue"])
         self.know_combo.pack(side="left")
         ctk.CTkButton(
-            f, text="📖", width=24, height=24,
+            f, text="💡", width=24, height=24,
             command=lambda: HelpInfoPopup(
                 self, "Connaissance",
                 "Quel est mon niveau de maîtrise sur ce sujet ?\n\n"
@@ -264,7 +284,7 @@ class SPEstimatorPopup(ctk.CTkToplevel):
             values=["Aucune", "Presque aucune", "Quelques (≥ 3)", "Peu (≥ 4)", "Plus que peu (≥ 5)", "Inconnue (?)"])
         self.dep_combo.pack(side="left")
         ctk.CTkButton(
-            f, text="📖", width=24, height=24,
+            f, text="💡", width=24, height=24,
             command=lambda: HelpInfoPopup(
                 self, "Dépendances",
                 "Combien de dépendances externes ai-je ?\n\n"
@@ -287,7 +307,7 @@ class SPEstimatorPopup(ctk.CTkToplevel):
         self.apps_entry = ctk.CTkEntry(f, width=80, textvariable=self.apps_var)
         self.apps_entry.pack(side="left")
         ctk.CTkButton(
-            f, text="📖", width=24, height=24,
+            f, text="💡", width=24, height=24,
             command=lambda: HelpInfoPopup(
                 self, "Nombre d'applications",
                 "Sur combien d'applications le travail doit-il être fait ?\n\n"

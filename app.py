@@ -1203,6 +1203,8 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                 fg_color="transparent", text_color=("black", "white"),
                 hover_color="#3a7bc8", height=25)
             btn.pack(fill="x", pady=1)
+        h = len(items) * 27 + 5
+        self.story_points_dropdown.configure(height=min(h, 200))
         self.story_points_dropdown.place(in_=self.story_points_entry, x=0, rely=1, relx=0,
                                          y=3, anchor="nw")
         self.story_points_dropdown.lift()
@@ -1255,6 +1257,8 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                 fg_color="transparent", text_color=("black", "white"),
                 hover_color="#3a7bc8", height=25)
             btn.pack(fill="x", pady=1)
+        h = len(items) * 27 + 5
+        self.priority_dropdown.configure(height=min(h, 150))
         self.priority_dropdown.place(in_=self.priority_entry, x=0, rely=1, relx=0,
                                      y=3, anchor="nw")
         self.priority_dropdown.lift()

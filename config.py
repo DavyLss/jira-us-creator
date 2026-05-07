@@ -13,7 +13,7 @@ CONFIG_DIR = _get_config_dir()
 CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
 
 DEFAULT_CONFIG = {
-    "jira_url": "https://jira.votre-entreprise.fr/jira",
+    "jira_url": "",
     "jira_token": "",
     "verify_ssl": False,
     "favorite_projects": [],

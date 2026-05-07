@@ -36,6 +36,7 @@ python -m PyInstaller ^
     --onefile ^
     --noconsole ^
     --name "JiraUSCreator" ^
+    --icon=app.ico ^
     main.py
 
 if errorlevel 1 (

@@ -628,8 +628,8 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                      lambda e: self.after(100, self._show_story_points_dd, self.all_story_points))
         self.story_points_entry.bind("<FocusOut>",
                                      lambda e: self.after(200, self._hide_story_points_dd))
-        self.story_points_dropdown = ctk.CTkScrollableFrame(
-            self, height=120, width=80)
+        self.story_points_dropdown = ctk.CTkFrame(
+            self, height=167, width=80, corner_radius=6)
         self.story_points_dropdown.place_forget()
 
         self.auto_sp_btn = ctk.CTkButton(
@@ -651,8 +651,8 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                  lambda e: self.after(100, self._show_priority_dd, self.all_priorities))
         self.priority_entry.bind("<FocusOut>",
                                  lambda e: self.after(200, self._hide_priority_dd))
-        self.priority_dropdown = ctk.CTkScrollableFrame(
-            self, height=120, width=150)
+        self.priority_dropdown = ctk.CTkFrame(
+            self, height=100, width=150, corner_radius=6)
         self.priority_dropdown.place_forget()
 
         # --- Row 12 : Composants ---
@@ -1202,7 +1202,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                 command=lambda t=item: self._select_story_points(t),
                 fg_color="transparent", text_color=("black", "white"),
                 hover_color="#3a7bc8", height=25)
-            btn.pack(fill="x", pady=1)
+            btn.pack(fill="x", pady=1, padx=2)
         h = len(items) * 27 + 5
         self.story_points_dropdown.configure(height=min(h, 200))
         self.story_points_dropdown.place(in_=self.story_points_entry, x=0, rely=1, relx=0,
@@ -1256,7 +1256,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                 command=lambda t=item: self._select_priority(t),
                 fg_color="transparent", text_color=("black", "white"),
                 hover_color="#3a7bc8", height=25)
-            btn.pack(fill="x", pady=1)
+            btn.pack(fill="x", pady=1, padx=2)
         h = len(items) * 27 + 5
         self.priority_dropdown.configure(height=min(h, 150))
         self.priority_dropdown.place(in_=self.priority_entry, x=0, rely=1, relx=0,

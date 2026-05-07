@@ -575,8 +575,8 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                     lambda e: self.after(100, self._show_ticket_type_dd, self.all_ticket_types))
         self.ticket_type_entry.bind("<FocusOut>",
                                     lambda e: self.after(200, self._hide_ticket_type_dd))
-        self.ticket_type_dropdown = ctk.CTkScrollableFrame(
-            self, height=120, width=200)
+        self.ticket_type_dropdown = ctk.CTkFrame(
+            self, height=120, width=200, corner_radius=6)
         self.ticket_type_dropdown.place_forget()
 
         # --- Row 7b : Type User Story Technique ---
@@ -592,8 +592,8 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                  lambda e: self.after(100, self._show_ust_type_dd, self.all_ust_types))
         self.ust_type_entry.bind("<FocusOut>",
                                  lambda e: self.after(200, self._hide_ust_type_dd))
-        self.ust_type_dropdown = ctk.CTkScrollableFrame(
-            self, height=120, width=200)
+        self.ust_type_dropdown = ctk.CTkFrame(
+            self, height=120, width=200, corner_radius=6)
         self.ust_type_dropdown.place_forget()
 
         # --- Row 9 : Tâche OPS à réaliser ---
@@ -1101,7 +1101,9 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                 command=lambda t=item: self._select_ticket_type(t),
                 fg_color="transparent", text_color=("black", "white"),
                 hover_color="#3a7bc8", height=25)
-            btn.pack(fill="x", pady=1)
+            btn.pack(fill="x", pady=1, padx=2)
+        h = len(items) * 27 + 5
+        self.ticket_type_dropdown.configure(height=min(h, 200))
         self.ticket_type_dropdown.place(in_=self.ticket_type_entry, x=0, rely=1, relx=0,
                                         y=3, anchor="nw")
         self.ticket_type_dropdown.lift()
@@ -1150,7 +1152,9 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                 command=lambda t=item: self._select_ust_type(t),
                 fg_color="transparent", text_color=("black", "white"),
                 hover_color="#3a7bc8", height=25)
-            btn.pack(fill="x", pady=1)
+            btn.pack(fill="x", pady=1, padx=2)
+        h = len(items) * 27 + 5
+        self.ust_type_dropdown.configure(height=min(h, 200))
         self.ust_type_dropdown.place(in_=self.ust_type_entry, x=0, rely=1, relx=0,
                                      y=3, anchor="nw")
         self.ust_type_dropdown.lift()

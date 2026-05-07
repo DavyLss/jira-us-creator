@@ -1451,8 +1451,8 @@ class JiraUSApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Jira User Story Creator")
-        self.geometry("700x820")
-        self.minsize(650, 750)
+        self.geometry("700x950")
+        self.minsize(650, 880)
         self.config = load_config()
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 

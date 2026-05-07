@@ -120,9 +120,6 @@ class JiraAPI:
         if component:
             payload["fields"]["components"] = [{"name": component}]
 
-        if sprint_id:
-            payload["fields"]["customfield_11750"] = sprint_id
-
         resp = requests.post(url, headers=self.headers,
                              json=payload, verify=self.verify, timeout=30)
         if resp.status_code in (200, 201):
@@ -130,6 +127,8 @@ class JiraAPI:
             key = data.get("key", "")
             if assignee and key:
                 self._assign_issue(key, assignee)
+            if sprint_id and key:
+                self._add_to_sprint(key, sprint_id)
             return True, key, data.get("self", "")
         elif priority and "priority" in resp.text.lower():
             payload["fields"].pop("priority", None)
@@ -140,6 +139,8 @@ class JiraAPI:
                 key = data.get("key", "")
                 if assignee and key:
                     self._assign_issue(key, assignee)
+                if sprint_id and key:
+                    self._add_to_sprint(key, sprint_id)
                 return True, key, data.get("self", "")
             else:
                 return False, None, resp2.text[:500]
@@ -152,5 +153,14 @@ class JiraAPI:
         try:
             requests.put(url, headers=self.headers,
                          json=payload, verify=self.verify, timeout=15)
+        except Exception:
+            pass
+
+    def _add_to_sprint(self, issue_key, sprint_id):
+        url = f"{self.url}/rest/agile/1.0/sprint/{sprint_id}/issue"
+        payload = {"issues": [issue_key]}
+        try:
+            requests.post(url, headers=self.headers,
+                          json=payload, verify=self.verify, timeout=15)
         except Exception:
             pass

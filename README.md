@@ -1,95 +1,168 @@
 # JiraUSCreator
 
-Application Windows pour créer des User Stories sur Jira via l'API REST.
+<p align="center">
+  <img src="https://img.shields.io/github/stars/DavyLss/jira-us-creator?style=flat-square" alt="stars" />
+  <img src="https://img.shields.io/github/release/DavyLss/jira-us-creator?style=flat-square" alt="releases" />
+  <img src="https://img.shields.io/github/last-commit/DavyLss/jira-us-creator?style=flat-square" alt="last commit" />
+  <img src="https://img.shields.io/github/license/DavyLss/jira-us-creator?style=flat-square" alt="license" />
+  <img src="https://img.shields.io/badge/platform-Windows-2b2b2b?style=flat-square" alt="Windows" />
+</p>
 
-## Fonctionnalités
+<p align="center"><strong>Small Windows app to create Jira user stories from templates, fast and reliable</strong></p>
 
-- **Connexion à Jira** via Bearer Token (Personal Access Token)
-- **Recherche de projets** et sélection par favoris
-- **Recherche d'Epics** (Features) liés au projet sélectionné
-- **Création de User Stories** avec champs personnalisés :
-  - Type de ticket, Type UST, Tâche OPS
-  - Composants (chargés dynamiquement depuis Jira)
-  - Story Points (saisie manuelle ou estimateur automatique)
-  - Priorité, Epic Link
-  - Ajout au sprint actif via l'API Agile Jira
-  - Assignation automatique à l'utilisateur connecté
-- **Estimateur de Story Points** avec guide d'aide interactif
-- **Sauvegarde de templates** de User Story
-- **Favoris** projets et epics avec accès rapide
-- **Dropdowns avec recherche** et hauteur dynamique
+---
 
-## Installation
+## Quick facts
 
-### Prérequis
-- Python 3.10+ (pour compiler depuis les sources)
-- Accès à une instance Jira avec un Personal Access Token valide
+- Platform: Windows desktop (executable)
+- Language: Python 3.10+ for build, executable distributed
+- License: MIT
+- Topics: jira, windows, automation, ux, developer-tools
 
-### Utiliser l'exécutable
+---
 
-1. Téléchargez la dernière version depuis les [Releases](https://github.com/DavyLss/jira-us-creator/releases)
-2. Copiez `JiraUSCreator.exe` où vous souhaitez
-3. Lancez le fichier
-4. Configurez l'URL de votre Jira et votre token dans l'onglet **Configuration**
+## Highlights
 
-### Compiler depuis les sources
+- Create user stories quickly using templates, story point estimator, and optional add-to-sprint workflow
+- Search and select projects and epics, favorites support
+- Save and reuse templates for consistent ticket creation
+- Lightweight, offline-capable UI (local config storage)
+
+---
+
+## Install & run (English)
+
+1. Download the latest release from Releases
+2. Copy `JiraUSCreator.exe` to a folder and run it
+3. In Configuration, set your Jira URL and Personal Access Token, test connection, then save
+
+
+## Build from source (English)
 
 ```powershell
-# Cloner le repo
+# Clone
 git clone https://github.com/DavyLss/jira-us-creator.git
 cd jira-us-creator
 
-# Installer les dépendances
+# Install dependencies
 pip install -r requirements.txt
 
-# Compiler l'exécutable
+# Build (Windows)
 .\build.bat
 ```
 
-L'exécutable sera généré dans `dist\JiraUSCreator.exe`.
+Executable will be in `dist\JiraUSCreator.exe`.
 
-## Utilisation
+---
 
-### Configuration
-1. Entrez l'URL de votre instance Jira (ex: `https://jira.votre-entreprise.fr/jira`)
-2. Entrez votre **Personal Access Token**
-3. Cliquez sur **Tester** pour valider la connexion
-4. Cliquez sur **Sauvegarder**
+## Configuration
 
-### Créer une User Story
-1. Sélectionnez un projet (recherche ou favoris)
-2. Sélectionnez un Epic/Feature lié
-3. Remplissez les champs : Titre, Description, Type, etc.
-4. Utilisez le bouton **Auto** pour estimer les Story Points
-5. Cochez **Ajouter au sprint actif** pour assigner automatiquement
-6. Cliquez sur **Créer la Jira**
-
-### Désinstaller
-- Lancez `uninstall.bat` ou utilisez le bouton **Désinstaller** dans l'onglet Configuration
-- Supprime manuellement `%LOCALAPPDATA%\jira-us-creator\` si nécessaire
-
-## Structure
-
-```
-jira-us-creator/
-├── app.py              # Interface principale (CustomTkinter)
-├── jira_api.py         # Client API Jira REST + Agile
-├── config.py           # Gestion de la configuration locale
-├── main.py             # Point d'entrée
-├── build.bat           # Script de compilation PyInstaller
-├── install.bat         # Script d'installation
-├── uninstall.bat       # Script de désinstallation
-├── requirements.txt    # Dépendances Python
-└── app.ico             # Icône de l'application
-```
-
-## Configuration locale
-
-Les paramètres sont sauvegardés dans :
+Local config path:
 ```
 %LOCALAPPDATA%\jira-us-creator\config.json
 ```
 
-## Licence
+Settings saved locally, no secrets are committed to the repo. Use a Personal Access Token with the minimal scopes required by your Jira instance.
 
-[MIT License](LICENSE)
+---
+
+## Usage
+
+- Open the app, select project or use favorites
+- Select or search for an Epic, fill the story template, estimate story points
+- Optionally add created issue to the active sprint
+- Create, and the ticket will be opened in the target Jira instance
+
+---
+
+## Security & privacy
+
+- Do not commit your Jira token, it is stored locally in user config only
+- Prefer scoped tokens with the least privileges required for creation and sprint updates
+
+---
+
+## License
+
+MIT License — see LICENSE file.
+
+---
+
+# JiraUSCreator (FR)
+
+<p align="center"><strong>Application Windows pour créer rapidement des user stories Jira depuis des modèles</strong></p>
+
+---
+
+## Faits rapides
+
+- Plateforme: Windows desktop (exécutable)
+- Langage: Python 3.10+ pour la compilation, exécutable distribué
+- Licence: MIT
+- Topics: jira, windows, automation, ux, developer-tools
+
+---
+
+## Points forts
+
+- Création rapide de user stories avec templates et estimateur de story points
+- Recherche et sélection de projets et d'epics, prise en charge des favoris
+- Sauvegarde et réutilisation des templates
+- UI légère, stockage local des paramètres, fonctionnement hors ligne pour la configuration
+
+---
+
+## Installation et exécution (FR)
+
+1. Téléchargez la dernière release depuis Releases
+2. Copiez `JiraUSCreator.exe` et lancez-le
+3. Dans Configuration, renseignez l'URL Jira et votre Personal Access Token, testez la connexion puis sauvegardez
+
+---
+
+## Compiler depuis les sources (FR)
+
+```powershell
+# Cloner
+git clone https://github.com/DavyLss/jira-us-creator.git
+cd jira-us-creator
+
+# Installer dépendances
+pip install -r requirements.txt
+
+# Compiler (Windows)
+.\build.bat
+```
+
+L'exécutable sera dans `dist\JiraUSCreator.exe`.
+
+---
+
+## Configuration locale
+
+Chemin de config locale:
+```
+%LOCALAPPDATA%\jira-us-creator\config.json
+```
+
+---
+
+## Utilisation (FR)
+
+- Ouvrez l'application, sélectionnez un projet ou utilisez vos favoris
+- Sélectionnez un Epic, remplissez le template, estimer les story points
+- Optionnel: ajouter l'issue créée au sprint actif
+- Cliquez sur créer, et la ticket sera publié dans votre instance Jira
+
+---
+
+## Sécurité & vie privée (FR)
+
+- Ne commitez pas votre token Jira, il reste en local
+- Préférez des tokens restreints aux permissions minimales nécessaires
+
+---
+
+## Licence (FR)
+
+Licence MIT — voir le fichier LICENSE.

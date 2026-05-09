@@ -8,177 +8,111 @@
   <img src="https://img.shields.io/badge/platform-Windows-2b2b2b?style=flat-square" alt="Windows" />
 </p>
 
-<p align="center"><strong>Windows app to create Jira user stories faster, with reusable templates and a simple workflow</strong></p>
+<p align="center"><strong>Windows app to create Jira user stories faster, with reusable templates and a simple workflow.</strong><br/>
+<strong>Application Windows pour créer des user stories Jira plus vite, avec des modèles réutilisables et un workflow simple.</strong></p>
 
 ---
 
-## Quick facts
+## Quick facts / Faits rapides
 
-- Platform: Windows desktop (executable)
-- Language: Python 3.10+ for build, executable distributed
-- License: MIT
-- Topics: jira, windows, automation, ux, developer-tools
+- **Platform:** Windows desktop (executable)  
+  **Plateforme :** Windows desktop (exécutable)
+- **Language:** Python 3.10+ for build, executable distributed  
+  **Langage :** Python 3.10+ pour la compilation, exécutable distribué
+- **License:** MIT  
+  **Licence :** MIT
+- **Topics:** jira, windows, automation, ux, developer-tools  
+  **Sujets :** jira, windows, automation, ux, developer-tools
 
 ---
 
-## Highlights
+## Highlights / Points forts
 
-- Create user stories faster with templates, a story point helper, and optional sprint assignment
-- Find projects and epics quickly, with favorites for the ones you use most
-- Save and reuse templates to keep ticket creation consistent
-- Simple desktop UI, local configuration, no unnecessary setup
+- Create user stories faster with templates, a story point helper, and optional sprint assignment.  
+  Créez des user stories plus vite avec des templates, une aide aux story points et l’ajout optionnel au sprint.
+- Find projects and epics quickly, with favorites for the ones you use most.  
+  Trouvez rapidement projets et epics, avec des favoris pour les plus utilisés.
+- Save and reuse templates to keep ticket creation consistent.  
+  Sauvegardez et réutilisez des templates pour garder une création homogène.
+- Simple desktop UI, local configuration, no unnecessary setup.  
+  Interface desktop simple, configuration locale, sans complexité inutile.
 
-### Configuration screen
+### Configuration screen / Écran de configuration
 
 ![JiraUSCreator configuration screen](docs/images/configuration-screen.jpg)
 
-### Create User Story screen
+### Create User Story screen / Écran de création de User Story
 
 ![JiraUSCreator create user story screen](docs/images/create-user-story-screen.jpg)
 
 ---
 
-## Install & run (English)
+## Install & run / Installation et exécution
 
-1. Download the latest release from Releases
-2. Copy `JiraUSCreator.exe` to a folder and run it
-3. In Configuration, set your Jira URL and Personal Access Token, test connection, then save
+1. Download the latest release from Releases.  
+   Téléchargez la dernière release depuis Releases.
+2. Copy `JiraUSCreator.exe` to a folder and run it.  
+   Copiez `JiraUSCreator.exe` dans un dossier et lancez-le.
+3. In Configuration, set your Jira URL and Personal Access Token, test connection, then save.  
+   Dans Configuration, renseignez l’URL Jira et votre Personal Access Token, testez la connexion puis sauvegardez.
 
+---
 
-## Build from source (English)
+## Build from source / Compiler depuis les sources
 
 ```powershell
-# Clone
+# Clone / Cloner
 git clone https://github.com/DavyLss/jira-us-creator.git
 cd jira-us-creator
 
-# Install dependencies
+# Install dependencies / Installer les dépendances
 pip install -r requirements.txt
 
-# Build (Windows)
+# Build (Windows) / Compiler (Windows)
 .\build.bat
 ```
 
-Executable will be in `dist\JiraUSCreator.exe`.
+Executable will be in `dist\JiraUSCreator.exe`.  
+L’exécutable sera dans `dist\JiraUSCreator.exe`.
 
 ---
 
 ## Configuration
 
-Local config path:
-```
-%LOCALAPPDATA%\jira-us-creator\config.json
-```
+Local config path: `%LOCALAPPDATA%\jira-us-creator\config.json`  
+Chemin de configuration locale : `%LOCALAPPDATA%\jira-us-creator\config.json`
 
-Settings are stored locally, and no secrets belong in the repository. Use a Personal Access Token with only the scopes your Jira setup really needs.
+Settings are stored locally, and no secrets belong in the repository.  
+Les paramètres sont stockés localement, et aucun secret ne doit être dans le dépôt.
 
----
-
-## Usage
-
-- Open the app, pick a project, or use your favorites
-- Select or search for an Epic, fill in the story, then estimate the story points
-- Optionally add the new issue to the active sprint
-- Create the ticket, and it is sent to the target Jira instance
+Use a Personal Access Token with only the scopes your Jira setup really needs.  
+Utilisez un Personal Access Token avec uniquement les permissions nécessaires.
 
 ---
 
-## Security & privacy
+## Usage / Utilisation
 
-- Do not commit your Jira token, it is stored locally in user config only
-- Prefer scoped tokens with the least privileges required for creation and sprint updates
-
----
-
-## License
-
-MIT License, see the LICENSE file.
-
----
-
-# JiraUSCreator (FR)
-
-<p align="center"><strong>Application Windows pour créer des user stories Jira plus vite, avec des modèles réutilisables et un workflow simple</strong></p>
+- Open the app, pick a project, or use your favorites.  
+  Ouvrez l’application, choisissez un projet, ou utilisez vos favoris.
+- Select or search for an Epic, fill in the story, then estimate the story points.  
+  Sélectionnez ou recherchez un Epic, remplissez la user story, puis estimez les story points.
+- Optionally add the new issue to the active sprint.  
+  Ajoutez éventuellement la nouvelle issue au sprint actif.
+- Create the ticket, and it is sent to the target Jira instance.  
+  Créez le ticket, et il est envoyé vers votre instance Jira cible.
 
 ---
 
-## Faits rapides
+## Security & privacy / Sécurité & vie privée
 
-- Plateforme: Windows desktop (exécutable)
-- Langage: Python 3.10+ pour la compilation, exécutable distribué
-- Licence: MIT
-- Topics: jira, windows, automation, ux, developer-tools
-
----
-
-## Points forts
-
-- Création plus rapide des user stories avec des templates, un aide pour les story points, et l'ajout optionnel au sprint
-- Recherche simple des projets et des epics, avec favoris pour les éléments les plus utilisés
-- Sauvegarde et réutilisation des templates pour garder une création homogène
-- Interface desktop simple, configuration locale, pas de complexité inutile
-
-### Capture d'écran de configuration
-
-![Écran de configuration JiraUSCreator](docs/images/configuration-screen.jpg)
-
-### Capture d'écran de création de User Story
-
-![Écran de création de User Story JiraUSCreator](docs/images/create-user-story-screen.jpg)
+- Do not commit your Jira token, it is stored locally in user config only.  
+  Ne commitez pas votre token Jira, il reste uniquement en local.
+- Prefer scoped tokens with the least privileges required for creation and sprint updates.  
+  Préférez des tokens restreints aux permissions minimales nécessaires pour la création et la mise à jour de sprint.
 
 ---
 
-## Installation et exécution (FR)
+## License / Licence
 
-1. Téléchargez la dernière release depuis Releases
-2. Copiez `JiraUSCreator.exe` et lancez-le
-3. Dans Configuration, renseignez l'URL Jira et votre Personal Access Token, testez la connexion puis sauvegardez
-
----
-
-## Compiler depuis les sources (FR)
-
-```powershell
-# Cloner
-git clone https://github.com/DavyLss/jira-us-creator.git
-cd jira-us-creator
-
-# Installer dépendances
-pip install -r requirements.txt
-
-# Compiler (Windows)
-.\build.bat
-```
-
-L'exécutable sera dans `dist\JiraUSCreator.exe`.
-
----
-
-## Configuration locale
-
-Chemin de config locale:
-```
-%LOCALAPPDATA%\jira-us-creator\config.json
-```
-
----
-
-## Utilisation (FR)
-
-- Ouvrez l'application, choisissez un projet, ou utilisez vos favoris
-- Sélectionnez ou recherchez un Epic, remplissez la user story, puis estimez les story points
-- Vous pouvez aussi ajouter directement l'issue au sprint actif
-- Cliquez sur créer, et le ticket est envoyé vers votre instance Jira
-
----
-
-## Sécurité & vie privée (FR)
-
-- Ne commitez pas votre token Jira, il reste en local
-- Préférez des tokens restreints aux permissions minimales nécessaires
-
----
-
-## Licence (FR)
-
+MIT License, see the LICENSE file.  
 Licence MIT, voir le fichier LICENSE.

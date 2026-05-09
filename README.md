@@ -32,6 +32,10 @@
 
 ![JiraUSCreator configuration screen](docs/images/configuration-screen.jpg)
 
+### Create User Story screen
+
+![JiraUSCreator create user story screen](docs/images/create-user-story-screen.jpg)
+
 ---
 
 ## Install & run (English)
@@ -117,6 +121,10 @@ MIT License, see the LICENSE file.
 ### Capture d'écran de configuration
 
 ![Écran de configuration JiraUSCreator](docs/images/configuration-screen.jpg)
+
+### Capture d'écran de création de User Story
+
+![Écran de création de User Story JiraUSCreator](docs/images/create-user-story-screen.jpg)
 
 ---
 

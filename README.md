@@ -28,6 +28,10 @@
 - Save and reuse templates to keep ticket creation consistent
 - Simple desktop UI, local configuration, no unnecessary setup
 
+### Configuration screen
+
+![JiraUSCreator configuration screen](docs/images/configuration-screen.jpg)
+
 ---
 
 ## Install & run (English)
@@ -109,6 +113,10 @@ MIT License, see the LICENSE file.
 - Recherche simple des projets et des epics, avec favoris pour les éléments les plus utilisés
 - Sauvegarde et réutilisation des templates pour garder une création homogène
 - Interface desktop simple, configuration locale, pas de complexité inutile
+
+### Capture d'écran de configuration
+
+![Écran de configuration JiraUSCreator](docs/images/configuration-screen.jpg)
 
 ---
 

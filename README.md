@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/platform-Windows-2b2b2b?style=flat-square" alt="Windows" />
 </p>
 
-<p align="center"><strong>Small Windows app to create Jira user stories from templates, fast and reliable</strong></p>
+<p align="center"><strong>Windows app to create Jira user stories faster, with reusable templates and a simple workflow</strong></p>
 
 ---
 
@@ -23,10 +23,10 @@
 
 ## Highlights
 
-- Create user stories quickly using templates, story point estimator, and optional add-to-sprint workflow
-- Search and select projects and epics, favorites support
-- Save and reuse templates for consistent ticket creation
-- Lightweight, offline-capable UI (local config storage)
+- Create user stories faster with templates, a story point helper, and optional sprint assignment
+- Find projects and epics quickly, with favorites for the ones you use most
+- Save and reuse templates to keep ticket creation consistent
+- Simple desktop UI, local configuration, no unnecessary setup
 
 ---
 
@@ -62,16 +62,16 @@ Local config path:
 %LOCALAPPDATA%\jira-us-creator\config.json
 ```
 
-Settings saved locally, no secrets are committed to the repo. Use a Personal Access Token with the minimal scopes required by your Jira instance.
+Settings are stored locally, and no secrets belong in the repository. Use a Personal Access Token with only the scopes your Jira setup really needs.
 
 ---
 
 ## Usage
 
-- Open the app, select project or use favorites
-- Select or search for an Epic, fill the story template, estimate story points
-- Optionally add created issue to the active sprint
-- Create, and the ticket will be opened in the target Jira instance
+- Open the app, pick a project, or use your favorites
+- Select or search for an Epic, fill in the story, then estimate the story points
+- Optionally add the new issue to the active sprint
+- Create the ticket, and it is sent to the target Jira instance
 
 ---
 
@@ -84,13 +84,13 @@ Settings saved locally, no secrets are committed to the repo. Use a Personal Acc
 
 ## License
 
-MIT License — see LICENSE file.
+MIT License, see the LICENSE file.
 
 ---
 
 # JiraUSCreator (FR)
 
-<p align="center"><strong>Application Windows pour créer rapidement des user stories Jira depuis des modèles</strong></p>
+<p align="center"><strong>Application Windows pour créer des user stories Jira plus vite, avec des modèles réutilisables et un workflow simple</strong></p>
 
 ---
 
@@ -105,10 +105,10 @@ MIT License — see LICENSE file.
 
 ## Points forts
 
-- Création rapide de user stories avec templates et estimateur de story points
-- Recherche et sélection de projets et d'epics, prise en charge des favoris
-- Sauvegarde et réutilisation des templates
-- UI légère, stockage local des paramètres, fonctionnement hors ligne pour la configuration
+- Création plus rapide des user stories avec des templates, un aide pour les story points, et l'ajout optionnel au sprint
+- Recherche simple des projets et des epics, avec favoris pour les éléments les plus utilisés
+- Sauvegarde et réutilisation des templates pour garder une création homogène
+- Interface desktop simple, configuration locale, pas de complexité inutile
 
 ---
 
@@ -149,10 +149,10 @@ Chemin de config locale:
 
 ## Utilisation (FR)
 
-- Ouvrez l'application, sélectionnez un projet ou utilisez vos favoris
-- Sélectionnez un Epic, remplissez le template, estimer les story points
-- Optionnel: ajouter l'issue créée au sprint actif
-- Cliquez sur créer, et la ticket sera publié dans votre instance Jira
+- Ouvrez l'application, choisissez un projet, ou utilisez vos favoris
+- Sélectionnez ou recherchez un Epic, remplissez la user story, puis estimez les story points
+- Vous pouvez aussi ajouter directement l'issue au sprint actif
+- Cliquez sur créer, et le ticket est envoyé vers votre instance Jira
 
 ---
 
@@ -165,4 +165,4 @@ Chemin de config locale:
 
 ## Licence (FR)
 
-Licence MIT — voir le fichier LICENSE.
+Licence MIT, voir le fichier LICENSE.

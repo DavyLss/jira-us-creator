@@ -6,7 +6,7 @@ import threading
 import urllib.request
 import json
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.2.0"
 GITHUB_RELEASES_URL = "https://api.github.com/repos/DavyLss/jira-us-creator/releases/latest"
 GITHUB_RELEASES_PAGE = "https://github.com/DavyLss/jira-us-creator/releases/latest"
 

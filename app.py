@@ -6,7 +6,7 @@ import threading
 import urllib.request
 import json
 
-APP_VERSION = "1.3.0"
+APP_VERSION = "1.4.0"
 GITHUB_RELEASES_URL = "https://api.github.com/repos/DavyLss/jira-us-creator/releases/latest"
 GITHUB_RELEASES_PAGE = "https://github.com/DavyLss/jira-us-creator/releases/latest"
 
@@ -23,60 +23,87 @@ class JiraConfigFrame(ctk.CTkFrame):
         self._build()
 
     def _build(self):
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
-        ctk.CTkLabel(self, text="Configuration Jira",
-                     font=ctk.CTkFont(size=20, weight="bold")).grid(
-            row=0, column=0, columnspan=3, padx=20, pady=20, sticky="w")
+        scrollable = ctk.CTkScrollableFrame(self, corner_radius=0)
+        scrollable.grid(row=0, column=0, sticky="nsew")
+        scrollable.grid_columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(self, text="URL Jira:").grid(
-            row=1, column=0, padx=20, pady=8, sticky="w")
-        self.url_entry = ctk.CTkEntry(self, width=400)
+        card = ctk.CTkFrame(scrollable, corner_radius=12)
+        card.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+        card.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(card, text="Connexion Jira",
+                     font=ctk.CTkFont(size=18, weight="bold")).grid(
+            row=0, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
+
+        ctk.CTkLabel(card, text="Configuration de l'accès au serveur Jira",
+                     text_color="gray").grid(
+            row=1, column=0, columnspan=3, padx=20, pady=(0, 15), sticky="w")
+
+        ctk.CTkLabel(card, text="URL Jira").grid(
+            row=2, column=0, padx=20, pady=(8, 2), sticky="w")
+        self.url_entry = ctk.CTkEntry(card, width=400)
         self.url_entry.insert(0, self.config.get("jira_url", ""))
-        self.url_entry.grid(row=1, column=1, padx=10, pady=8, sticky="we")
-        ctk.CTkLabel(self, text="(ex: https://jira.votre-entreprise.fr/jira)",
-                     text_color="gray").grid(row=1, column=2, padx=5, sticky="w")
+        self.url_entry.grid(row=3, column=0, columnspan=3, padx=20, pady=(0, 8), sticky="we")
+        ctk.CTkLabel(card, text="ex: https://jira.votre-entreprise.fr/jira",
+                     text_color="gray", font=ctk.CTkFont(size=11)).grid(
+            row=4, column=0, columnspan=3, padx=20, pady=(0, 5), sticky="w")
 
-        ctk.CTkLabel(self, text="Token / Jeton personnel:").grid(
-            row=2, column=0, padx=20, pady=8, sticky="w")
-        self.token_entry = ctk.CTkEntry(self, width=400, show="*")
+        ctk.CTkLabel(card, text="Token / Jeton personnel").grid(
+            row=5, column=0, padx=20, pady=(8, 2), sticky="w")
+        f = ctk.CTkFrame(card, fg_color="transparent")
+        f.grid(row=6, column=0, columnspan=3, padx=20, pady=(0, 8), sticky="we")
+        f.grid_columnconfigure(0, weight=1)
+        self.token_entry = ctk.CTkEntry(f, show="*")
         self.token_entry.insert(0, self.config.get("jira_token", ""))
-        self.token_entry.grid(row=2, column=1, padx=10, pady=8, sticky="we")
+        self.token_entry.grid(row=0, column=0, sticky="we")
         self.show_token_btn = ctk.CTkButton(
-            self, text="Afficher", width=80,
-            command=self._toggle_token)
-        self.show_token_btn.grid(row=2, column=2, padx=5, sticky="w")
+            f, text="👁", width=36, command=self._toggle_token)
+        self.show_token_btn.grid(row=0, column=1, padx=(4, 0))
 
         self.ssl_var = ctk.BooleanVar(
             value=self.config.get("verify_ssl", True))
-        ctk.CTkCheckBox(self, text="Vérifier le certificat SSL",
+        ctk.CTkCheckBox(card, text="Vérifier le certificat SSL",
                         variable=self.ssl_var).grid(
-            row=3, column=0, columnspan=2, padx=20, pady=8, sticky="w")
+            row=7, column=0, columnspan=3, padx=20, pady=8, sticky="w")
 
         self.test_btn = ctk.CTkButton(
-            self, text="Tester la connexion",
-            command=self._test_connection)
-        self.test_btn.grid(row=4, column=0, columnspan=3, padx=20, pady=10)
+            card, text="Tester la connexion",
+            command=self._test_connection, height=32)
+        self.test_btn.grid(row=8, column=0, columnspan=3, padx=20, pady=10)
 
-        self.status_lbl = ctk.CTkLabel(self, text="", text_color="gray")
-        self.status_lbl.grid(row=5, column=0, columnspan=3, padx=20, pady=5)
+        self.status_lbl = ctk.CTkLabel(card, text="", text_color="gray")
+        self.status_lbl.grid(row=9, column=0, columnspan=3, padx=20, pady=5)
+
+        ctk.CTkFrame(card, height=1, fg_color=("gray70", "gray30")).grid(
+            row=10, column=0, columnspan=3, padx=20, pady=15, sticky="we")
+
+        action_card = ctk.CTkFrame(scrollable, corner_radius=12)
+        action_card.grid(row=1, column=0, padx=20, pady=(0, 20), sticky="nsew")
+        action_card.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(action_card, text="Actions",
+                     font=ctk.CTkFont(size=18, weight="bold")).grid(
+            row=0, column=0, padx=20, pady=(20, 5), sticky="w")
 
         self.update_btn = ctk.CTkButton(
-            self, text="Vérifier les mises à jour", width=180,
+            action_card, text="Vérifier les mises à jour",
             command=lambda: check_for_updates(self),
-            fg_color="#5b8af5", hover_color="#3a6fd4")
-        self.update_btn.grid(row=6, column=0, columnspan=3, padx=20, pady=5)
+            fg_color="#5b8af5", hover_color="#3a6fd4", height=32)
+        self.update_btn.grid(row=1, column=0, padx=20, pady=5, sticky="w")
 
         self.auto_save_var = ctk.BooleanVar(value=True)
-        ctk.CTkCheckBox(self, text="Sauvegarde automatique",
+        ctk.CTkCheckBox(action_card, text="Sauvegarde automatique",
                         variable=self.auto_save_var).grid(
-            row=7, column=0, columnspan=3, padx=20, pady=5, sticky="w")
+            row=2, column=0, padx=20, pady=5, sticky="w")
 
         self.uninstall_btn = ctk.CTkButton(
-            self, text="Désinstaller", width=120,
+            action_card, text="Désinstaller", width=120,
             command=self._uninstall,
-            fg_color="#c0392b", hover_color="#e74c3c")
-        self.uninstall_btn.grid(row=8, column=0, columnspan=3, padx=20, pady=10)
+            fg_color="#c0392b", hover_color="#e74c3c", height=32)
+        self.uninstall_btn.grid(row=3, column=0, padx=20, pady=10, sticky="w")
 
     def _toggle_token(self):
         show = self.token_entry.cget("show") == ""
@@ -513,97 +540,136 @@ class JiraCreateUSFrame(ctk.CTkFrame):
     def _show_status(self, text, color):
         for w in self.result_frame.winfo_children():
             w.destroy()
-        ctk.CTkLabel(self.result_frame, text=text, text_color=color).pack()
+        ctk.CTkLabel(self.result_frame, text=text, text_color=color,
+                     font=ctk.CTkFont(size=13)).pack(padx=10, pady=8)
 
     def _build(self):
-        self.scrollable = ctk.CTkScrollableFrame(self)
+        self.scrollable = ctk.CTkScrollableFrame(self, corner_radius=0)
         self.scrollable.pack(fill="both", expand=True)
         self.scrollable.grid_columnconfigure(1, weight=1)
+        row = 0
 
-        ctk.CTkLabel(self.scrollable, text="Créer une User Story",
+        ctk.CTkLabel(self.scrollable, text="Nouvelle User Story",
                      font=ctk.CTkFont(size=20, weight="bold")).grid(
-            row=0, column=0, columnspan=3, padx=20, pady=20, sticky="w")
+            row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
+        ctk.CTkLabel(self.scrollable, text="Remplissez les champs ci-dessous pour créer une user story",
+                     text_color="gray").grid(
+            row=row+1, column=0, columnspan=3, padx=20, pady=(0, 15), sticky="w")
+        row += 2
 
-        # --- Row 1 : Projet ---
-        ctk.CTkLabel(self.scrollable, text="Projet:").grid(
-            row=1, column=0, padx=20, pady=8, sticky="w")
+        # ========== SECTION PROJET ==========
+        ctk.CTkFrame(self.scrollable, height=1, fg_color=("gray70", "gray30")).grid(
+            row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="we")
+        row += 1
+        ctk.CTkLabel(self.scrollable, text="Contexte",
+                     font=ctk.CTkFont(size=15, weight="bold")).grid(
+            row=row, column=0, columnspan=3, padx=20, pady=(0, 8), sticky="w")
+        row += 1
+
+        # --- Projet ---
+        ctk.CTkLabel(self.scrollable, text="Projet").grid(
+            row=row, column=0, padx=20, pady=5, sticky="w")
         self.proj_var = ctk.StringVar()
+        f = ctk.CTkFrame(self.scrollable, fg_color="transparent")
+        f.grid(row=row, column=1, padx=10, pady=5, sticky="we")
+        f.grid_columnconfigure(0, weight=1)
         self.proj_entry = ctk.CTkEntry(
-            self.scrollable, width=300, textvariable=self.proj_var,
+            f, textvariable=self.proj_var,
             placeholder_text="Tapez pour chercher un projet...")
-        self.proj_entry.grid(row=1, column=1, padx=10, pady=8, sticky="w")
+        self.proj_entry.grid(row=0, column=0, sticky="we")
         self.proj_entry.bind("<KeyRelease>", self._filter_projects)
         self.proj_entry.bind("<FocusOut>",
                              lambda e: self.after(200, self._hide_proj_dd))
         self.proj_refresh_btn = ctk.CTkButton(
-            self.scrollable, text="↻", width=30, command=self._load_all_projects)
-        self.proj_refresh_btn.grid(row=1, column=2, padx=5, sticky="w")
-
-        # Dropdown projet
+            f, text="↻", width=30, command=self._load_all_projects)
+        self.proj_refresh_btn.grid(row=0, column=1, padx=(4, 0))
         self.proj_dropdown = ctk.CTkScrollableFrame(
             self, height=150, width=300)
         self.proj_dropdown.place_forget()
+        row += 1
 
-        # --- Row 2 : Favoris projets ---
-        self.proj_fav_frame = ctk.CTkFrame(self.scrollable, height=26, width=500)
-        self.proj_fav_frame.grid(row=2, column=1, columnspan=2, padx=10, pady=0,
+        # --- Favoris projets ---
+        self.proj_fav_frame = ctk.CTkFrame(self.scrollable, height=28, fg_color="transparent")
+        self.proj_fav_frame.grid(row=row, column=1, columnspan=2, padx=10, pady=(0, 10),
                                  sticky="we")
-        self.proj_fav_frame.grid_propagate(False)
+        row += 1
 
-        # --- Row 3 : Epic Link ---
-        ctk.CTkLabel(self.scrollable, text="Epic Link:").grid(
-            row=3, column=0, padx=20, pady=8, sticky="w")
+        # --- Epic Link ---
+        ctk.CTkLabel(self.scrollable, text="Epic Link").grid(
+            row=row, column=0, padx=20, pady=5, sticky="w")
         self.epic_var = ctk.StringVar()
         self.epic_entry = ctk.CTkEntry(
-            self.scrollable, width=400, textvariable=self.epic_var,
+            self.scrollable, textvariable=self.epic_var,
             placeholder_text="Sélectionnez d'abord un projet",
             state="disabled")
-        self.epic_entry.grid(row=3, column=1, columnspan=2, padx=10, pady=8,
+        self.epic_entry.grid(row=row, column=1, columnspan=2, padx=10, pady=5,
                              sticky="we")
         self.epic_entry.bind("<KeyRelease>", self._filter_epics)
         self.epic_entry.bind("<FocusOut>",
                              lambda e: self.after(200, self._hide_epic_dd))
-
-        # Dropdown epic
         self.epic_dropdown = ctk.CTkScrollableFrame(
             self, height=150, width=400)
         self.epic_dropdown.place_forget()
+        row += 1
 
-        # --- Row 4 : Favoris epics ---
-        self.epic_fav_frame = ctk.CTkFrame(self.scrollable, height=26, width=500)
-        self.epic_fav_frame.grid(row=4, column=1, columnspan=2, padx=10, pady=0,
+        # --- Favoris epics ---
+        self.epic_fav_frame = ctk.CTkFrame(self.scrollable, height=28, fg_color="transparent")
+        self.epic_fav_frame.grid(row=row, column=1, columnspan=2, padx=10, pady=(0, 10),
                                  sticky="we")
-        self.epic_fav_frame.grid_propagate(False)
+        row += 1
 
-        # --- Row 5 : Titre ---
-        ctk.CTkLabel(self.scrollable, text="Titre:").grid(
-            row=5, column=0, padx=20, pady=8, sticky="w")
-        self.title_entry = ctk.CTkEntry(self.scrollable, width=500,
-            placeholder_text="[RESSOURCE][ELEMENT (facultatif)][DC][ENVIRONNEMENT] Résumé des actions")
-        self.title_entry.grid(row=5, column=1, columnspan=2, padx=10, pady=8,
+        # ========== SECTION DESCRIPTION ==========
+        ctk.CTkFrame(self.scrollable, height=1, fg_color=("gray70", "gray30")).grid(
+            row=row, column=0, columnspan=3, padx=20, pady=(5, 10), sticky="we")
+        row += 1
+        ctk.CTkLabel(self.scrollable, text="Description",
+                     font=ctk.CTkFont(size=15, weight="bold")).grid(
+            row=row, column=0, columnspan=3, padx=20, pady=(0, 8), sticky="w")
+        row += 1
+
+        # --- Titre ---
+        ctk.CTkLabel(self.scrollable, text="Titre").grid(
+            row=row, column=0, padx=20, pady=5, sticky="w")
+        self.title_entry = ctk.CTkEntry(self.scrollable,
+            placeholder_text="[RESSOURCE][ELEMENT][DC][ENVIRONNEMENT] Résumé des actions")
+        self.title_entry.grid(row=row, column=1, columnspan=2, padx=10, pady=5,
                               sticky="we")
+        row += 1
 
-        # --- Row 6 : Description ---
-        ctk.CTkLabel(self.scrollable, text="Description:").grid(
-            row=6, column=0, padx=20, pady=8, sticky="nw")
-        self.desc_text = ctk.CTkTextbox(self.scrollable, height=160, width=500)
+        # --- Description ---
+        ctk.CTkLabel(self.scrollable, text="Description").grid(
+            row=row, column=0, padx=20, pady=5, sticky="nw")
+        self.desc_text = ctk.CTkTextbox(self.scrollable, height=140)
         self.desc_text.insert(
             "1.0", "En tant que DevOps, je veux \"OBJECTIF\" afin de \"BENEFICE ATTENDU\".\n\n"
                     "Contraintes techniques : \"OUTIL OU TECHNOLOGIE\"\n"
                     "Contraintes fonctionnelles :\n"
                     "Critères d'acceptations : ")
         self.desc_text.see("1.0")
-        self.desc_text.grid(row=6, column=1, columnspan=2, padx=10, pady=8,
-                            sticky="we")
+        self.desc_text.grid(row=row, column=1, columnspan=2, padx=10, pady=5, sticky="we")
+        row += 1
 
-        # --- Row 7 : Type de ticket ---
-        ctk.CTkLabel(self.scrollable, text="Type de ticket:").grid(
-            row=7, column=0, padx=20, pady=8, sticky="w")
+        # ========== SECTION MÉTADONNÉES ==========
+        ctk.CTkFrame(self.scrollable, height=1, fg_color=("gray70", "gray30")).grid(
+            row=row, column=0, columnspan=3, padx=20, pady=(10, 10), sticky="we")
+        row += 1
+        ctk.CTkLabel(self.scrollable, text="Métadonnées",
+                     font=ctk.CTkFont(size=15, weight="bold")).grid(
+            row=row, column=0, columnspan=3, padx=20, pady=(0, 8), sticky="w")
+        row += 1
+
+        # --- Type de ticket + Type UST (côte à côte) ---
+        f2 = ctk.CTkFrame(self.scrollable, fg_color="transparent")
+        f2.grid(row=row, column=1, columnspan=2, padx=10, pady=2, sticky="we")
+        f2.grid_columnconfigure(0, weight=1)
+        f2.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(f2, text="Type de ticket").grid(row=0, column=0, sticky="w")
         self.ticket_type_var = ctk.StringVar(value="User Story Technique")
         self.ticket_type_entry = ctk.CTkEntry(
-            self.scrollable, width=200, textvariable=self.ticket_type_var,
-            placeholder_text="Tapez pour chercher...")
-        self.ticket_type_entry.grid(row=7, column=1, padx=10, pady=8, sticky="w")
+            f2, textvariable=self.ticket_type_var,
+            placeholder_text="Chercher...")
+        self.ticket_type_entry.grid(row=1, column=0, padx=(0, 4), sticky="we")
         self.ticket_type_entry.bind("<KeyRelease>", self._filter_ticket_type)
         self.ticket_type_entry.bind("<FocusIn>",
                                     lambda e: self.after(100, self._show_ticket_type_dd, self.all_ticket_types))
@@ -613,14 +679,12 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             self, height=120, width=200, corner_radius=6)
         self.ticket_type_dropdown.place_forget()
 
-        # --- Row 8 : Type UST ---
-        ctk.CTkLabel(self.scrollable, text="Type UST:").grid(
-            row=8, column=0, padx=20, pady=8, sticky="w")
+        ctk.CTkLabel(f2, text="Type UST").grid(row=0, column=1, sticky="w")
         self.ust_type_var = ctk.StringVar(value="UST Ops")
         self.ust_type_entry = ctk.CTkEntry(
-            self.scrollable, width=200, textvariable=self.ust_type_var,
-            placeholder_text="Tapez pour chercher...")
-        self.ust_type_entry.grid(row=8, column=1, padx=10, pady=8, sticky="w")
+            f2, textvariable=self.ust_type_var,
+            placeholder_text="Chercher...")
+        self.ust_type_entry.grid(row=1, column=1, padx=(4, 0), sticky="we")
         self.ust_type_entry.bind("<KeyRelease>", self._filter_ust_type)
         self.ust_type_entry.bind("<FocusIn>",
                                  lambda e: self.after(100, self._show_ust_type_dd, self.all_ust_types))
@@ -630,33 +694,43 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             self, height=120, width=200, corner_radius=6)
         self.ust_type_dropdown.place_forget()
 
-        # --- Row 9 : Tâche OPS ---
-        ctk.CTkLabel(self.scrollable, text="Tâche OPS:").grid(
-            row=9, column=0, padx=20, pady=8, sticky="w")
+        ctk.CTkLabel(self.scrollable, text="Type de ticket").grid(
+            row=row, column=0, padx=20, pady=(5, 2), sticky="w")
+        row += 1
+
+        # --- Tâche OPS ---
+        ctk.CTkLabel(self.scrollable, text="Tâche OPS").grid(
+            row=row, column=0, padx=20, pady=5, sticky="w")
         self.task_ops_var = ctk.StringVar(value="AUTO - Agir sur les pipelines de déploiement")
         self.task_ops_entry = ctk.CTkEntry(
-            self.scrollable, width=400, textvariable=self.task_ops_var,
+            self.scrollable, textvariable=self.task_ops_var,
             placeholder_text="Tapez pour chercher une tâche OPS...")
-        self.task_ops_entry.grid(row=9, column=1, columnspan=2, padx=10, pady=8,
+        self.task_ops_entry.grid(row=row, column=1, columnspan=2, padx=10, pady=5,
                                  sticky="we")
         self.task_ops_entry.bind("<KeyRelease>", self._filter_task_ops)
         self.task_ops_entry.bind("<FocusIn>",
                                  lambda e: self.after(100, self._show_task_ops_dd, sorted(self.all_task_ops)))
         self.task_ops_entry.bind("<FocusOut>",
                                  lambda e: self.after(200, self._hide_task_ops_dd))
-
         self.task_ops_dropdown = ctk.CTkScrollableFrame(
             self, height=150, width=400)
         self.task_ops_dropdown.place_forget()
+        row += 1
 
-        # --- Row 10 : Story Points ---
-        ctk.CTkLabel(self.scrollable, text="Story Points:").grid(
-            row=10, column=0, padx=20, pady=8, sticky="w")
+        # --- Story Points + Priorité (côte à côte) ---
+        f3 = ctk.CTkFrame(self.scrollable, fg_color="transparent")
+        f3.grid(row=row, column=1, columnspan=2, padx=10, pady=2, sticky="we")
+        f3.grid_columnconfigure(0, weight=1)
+        f3.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(f3, text="Story Points").grid(row=0, column=0, sticky="w")
+        sp_f = ctk.CTkFrame(f3, fg_color="transparent")
+        sp_f.grid(row=1, column=0, padx=(0, 4), sticky="we")
+        sp_f.grid_columnconfigure(0, weight=1)
         self.story_points_var = ctk.StringVar()
         self.story_points_entry = ctk.CTkEntry(
-            self.scrollable, width=80, textvariable=self.story_points_var,
-            placeholder_text="SP")
-        self.story_points_entry.grid(row=10, column=1, padx=10, pady=8, sticky="w")
+            sp_f, textvariable=self.story_points_var, placeholder_text="SP")
+        self.story_points_entry.grid(row=0, column=0, sticky="we")
         self.story_points_entry.bind("<KeyRelease>", self._filter_story_points)
         self.story_points_entry.bind("<FocusIn>",
                                      lambda e: self.after(100, self._show_story_points_dd, self.all_story_points))
@@ -665,21 +739,16 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.story_points_dropdown = ctk.CTkFrame(
             self, height=167, width=80, corner_radius=6)
         self.story_points_dropdown.place_forget()
-
         self.auto_sp_btn = ctk.CTkButton(
-            self.scrollable, text="Auto", width=50,
-            command=self._show_sp_estimator,
+            sp_f, text="Auto", width=50, command=self._show_sp_estimator,
             fg_color="#8b5cf6", hover_color="#7c3aed")
-        self.auto_sp_btn.grid(row=10, column=2, padx=(0, 10), sticky="w")
+        self.auto_sp_btn.grid(row=0, column=1, padx=(4, 0))
 
-        # --- Row 11 : Priorité ---
-        ctk.CTkLabel(self.scrollable, text="Priorité:").grid(
-            row=11, column=0, padx=20, pady=8, sticky="w")
+        ctk.CTkLabel(f3, text="Priorité").grid(row=0, column=1, sticky="w")
         self.priority_var = ctk.StringVar()
         self.priority_entry = ctk.CTkEntry(
-            self.scrollable, width=150, textvariable=self.priority_var,
-            placeholder_text="Tapez pour chercher...")
-        self.priority_entry.grid(row=11, column=1, padx=10, pady=8, sticky="w")
+            f3, textvariable=self.priority_var, placeholder_text="Chercher...")
+        self.priority_entry.grid(row=1, column=1, padx=(4, 0), sticky="we")
         self.priority_entry.bind("<KeyRelease>", self._filter_priority)
         self.priority_entry.bind("<FocusIn>",
                                  lambda e: self.after(100, self._show_priority_dd, self.all_priorities))
@@ -689,14 +758,18 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             self, height=100, width=150, corner_radius=6)
         self.priority_dropdown.place_forget()
 
-        # --- Row 12 : Composants ---
-        ctk.CTkLabel(self.scrollable, text="Composant:").grid(
-            row=12, column=0, padx=20, pady=8, sticky="w")
+        ctk.CTkLabel(self.scrollable, text="Story Points / Priorité").grid(
+            row=row, column=0, padx=20, pady=(5, 2), sticky="w")
+        row += 1
+
+        # --- Composant ---
+        ctk.CTkLabel(self.scrollable, text="Composant").grid(
+            row=row, column=0, padx=20, pady=5, sticky="w")
         self.component_var = ctk.StringVar()
         self.component_entry = ctk.CTkEntry(
-            self.scrollable, width=200, textvariable=self.component_var,
+            self.scrollable, textvariable=self.component_var,
             placeholder_text="Sélectionnez d'abord un projet...")
-        self.component_entry.grid(row=12, column=1, padx=10, pady=8, sticky="w")
+        self.component_entry.grid(row=row, column=1, padx=10, pady=5, sticky="we")
         self.component_entry.bind("<KeyRelease>", self._filter_components)
         self.component_entry.bind("<FocusIn>",
                                   lambda e: self.after(100, self._show_component_dd, sorted(self.all_components.keys()) if self.all_components else []))
@@ -705,25 +778,34 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.component_dropdown = ctk.CTkScrollableFrame(
             self, height=120, width=200)
         self.component_dropdown.place_forget()
+        row += 1
 
-        # --- Row 13 : Sprint actif ---
+        # --- Sprint actif ---
+        ctk.CTkLabel(self.scrollable, text="Sprint").grid(
+            row=row, column=0, padx=20, pady=5, sticky="w")
         self.sprint_var = ctk.BooleanVar(value=False)
         self.sprint_cb = ctk.CTkCheckBox(
             self.scrollable, text="Ajouter au sprint actif",
             variable=self.sprint_var)
-        self.sprint_cb.grid(row=13, column=0, columnspan=2, padx=20, pady=5, sticky="w")
-        self.sprint_lbl = ctk.CTkLabel(self.scrollable, text="", text_color="gray", font=ctk.CTkFont(size=10))
-        self.sprint_lbl.grid(row=13, column=2, padx=10, pady=5, sticky="w")
+        self.sprint_cb.grid(row=row, column=1, padx=10, pady=5, sticky="w")
+        self.sprint_lbl = ctk.CTkLabel(self.scrollable, text="", text_color="gray")
+        self.sprint_lbl.grid(row=row, column=2, padx=10, pady=5, sticky="w")
+        row += 1
 
-        # --- Row 14 : Bouton ---
+        # ========== BOUTON ==========
+        ctk.CTkFrame(self.scrollable, height=1, fg_color=("gray70", "gray30")).grid(
+            row=row, column=0, columnspan=3, padx=20, pady=(10, 10), sticky="we")
+        row += 1
+
         self.create_btn = ctk.CTkButton(
-            self.scrollable, text="Créer la User Story",
-            command=self._create_us, fg_color="#2b6cb0", hover_color="#2c5282")
-        self.create_btn.grid(row=14, column=0, columnspan=3, padx=20, pady=15)
+            self.scrollable, text="Créer la User Story", height=36,
+            command=self._create_us, fg_color="#2563eb", hover_color="#1d4ed8")
+        self.create_btn.grid(row=row, column=0, columnspan=3, padx=20, pady=10)
+        row += 1
 
-        # --- Row 15 : Résultat ---
-        self.result_frame = ctk.CTkFrame(self.scrollable)
-        self.result_frame.grid(row=15, column=0, columnspan=3, padx=20, pady=5,
+        # ========== RÉSULTAT ==========
+        self.result_frame = ctk.CTkFrame(self.scrollable, corner_radius=8)
+        self.result_frame.grid(row=row, column=0, columnspan=3, padx=20, pady=(0, 20),
                                sticky="we")
 
     # ============================================================
@@ -843,17 +925,18 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             w.destroy()
         favs = self.config.get("favorite_projects", [])
         if not favs:
-            ctk.CTkLabel(self.proj_fav_frame, text="Aucun favori (★ depuis la liste)",
-                         text_color="gray", font=ctk.CTkFont(size=9)).pack(
+            ctk.CTkLabel(self.proj_fav_frame, text="Aucun favori ★",
+                         text_color="gray", font=ctk.CTkFont(size=10)).pack(
                 side="left", padx=5)
             return
         for key in favs:
             btn = ctk.CTkButton(
-                self.proj_fav_frame, text=f"★ {key}", width=70, height=20,
-                font=ctk.CTkFont(size=9),
+                self.proj_fav_frame, text=f"★ {key}", height=22,
+                font=ctk.CTkFont(size=10),
                 command=lambda k=key: self._select_fav_project(k),
-                fg_color="#f0b429", text_color="black", hover_color="#e09400")
-            btn.pack(side="left", padx=2, pady=2)
+                fg_color="#f0b429", text_color="black", hover_color="#e09400",
+                corner_radius=12)
+            btn.pack(side="left", padx=3, pady=2)
 
     def _select_fav_project(self, key):
         label = f"{key} - {key}"
@@ -1107,17 +1190,18 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             self.config["favorite_epics"] = fav_epics
             save_config(self.config)
         if not fav_epics:
-            ctk.CTkLabel(self.epic_fav_frame, text="Aucun favori (★ depuis la liste)",
-                         text_color="gray", font=ctk.CTkFont(size=9)).pack(
+            ctk.CTkLabel(self.epic_fav_frame, text="Aucun favori ★",
+                         text_color="gray", font=ctk.CTkFont(size=10)).pack(
                 side="left", padx=5)
             return
         for key, summary in fav_epics.items():
             btn = ctk.CTkButton(
-                self.epic_fav_frame, text=f"★ {summary}", width=100, height=20,
-                font=ctk.CTkFont(size=9),
+                self.epic_fav_frame, text=f"★ {summary}", height=22,
+                font=ctk.CTkFont(size=10),
                 command=lambda k=key: self._select_fav_epic(k),
-                fg_color="#f0b429", text_color="black", hover_color="#e09400")
-            btn.pack(side="left", padx=2, pady=2)
+                fg_color="#f0b429", text_color="black", hover_color="#e09400",
+                corner_radius=12)
+            btn.pack(side="left", padx=3, pady=2)
 
     def _select_fav_epic(self, key):
         for lbl, k in self.all_epics.items():
@@ -1503,20 +1587,23 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         for w in self.result_frame.winfo_children():
             w.destroy()
         if ok:
-            lbl = ctk.CTkLabel(self.result_frame, text="Succès !", text_color="green",
-                               font=ctk.CTkFont(size=14, weight="bold"))
-            lbl.pack(side="left", padx=0)
-            link = ctk.CTkLabel(self.result_frame, text=f"{key}",
-                                text_color="#3a86c8", cursor="hand2",
+            f = ctk.CTkFrame(self.result_frame, fg_color="transparent")
+            f.pack(padx=10, pady=8)
+            ctk.CTkLabel(f, text="✅  Succès !", text_color="#16a34a",
+                         font=ctk.CTkFont(size=14, weight="bold")).pack(
+                side="left", padx=(0, 5))
+            link = ctk.CTkLabel(f, text=f"  {key}  ",
+                                text_color="#1d4ed8", cursor="hand2",
                                 font=ctk.CTkFont(size=14, underline=True))
-            link.pack(side="left", padx=(4, 0))
+            link.pack(side="left")
             link.bind("<Button-1>",
                       lambda e: self._open_url(f"{self.jira.url}/browse/{key}"))
             self.config.setdefault("last_created", []).append(key)
             save_config(self.config)
         else:
-            ctk.CTkLabel(self.result_frame, text=f"Erreur: {err}",
-                         text_color="red").pack()
+            ctk.CTkLabel(self.result_frame, text=f"❌  {err}",
+                         text_color="#dc2626",
+                         font=ctk.CTkFont(size=13)).pack(padx=10, pady=8)
 
     def _open_url(self, url):
         import webbrowser
@@ -1527,8 +1614,8 @@ class JiraUSApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Jira User Story Creator")
-        self.geometry("700x950")
-        self.minsize(650, 880)
+        self.geometry("750x800")
+        self.minsize(700, 600)
         self.config = load_config()
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
@@ -1544,28 +1631,11 @@ class JiraUSApp(ctk.CTk):
         self.create_frame = JiraCreateUSFrame(self.tab_create, self.config)
         self.create_frame.pack(fill="both", expand=True)
 
-        # Hook tab changes (both clicks and programmatic set())
-        self.tabview._command = lambda: self.after(50, self._resize_to_fit)
-        original_set = self.tabview.set
-        def _on_set(name):
-            original_set(name)
-            self.after(50, self._resize_to_fit)
-        self.tabview.set = _on_set
-
         has_token = bool(self.config.get("jira_token", "").strip())
         if has_token:
             self.tabview.set("Créer User Story")
 
-        self.after(100, self._resize_to_fit)
         self.after(3000, lambda: check_for_updates(self))
-
-    def _resize_to_fit(self):
-        self.update_idletasks()
-        current = self.tabview.get()
-        tab = self.tabview.tab(current)
-        h = tab.winfo_reqheight() + 80
-        h = max(500, min(h, 950))
-        self.geometry(f"700x{int(h)}")
 
     def _on_close(self):
         url = self.config_frame.url_entry.get().strip()

@@ -791,6 +791,8 @@ class JiraCreateUSFrame(ctk.CTkFrame):
     def _show_proj_dd(self, items):
         for w in self.proj_dropdown.winfo_children():
             w.destroy()
+        self.proj_dropdown.grid_columnconfigure(0, minsize=30)
+        self.proj_dropdown.grid_columnconfigure(1, weight=1)
         favs = set(self.config.get("favorite_projects", []))
         row = 0
         for item in items:
@@ -806,13 +808,13 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                 self.proj_dropdown, text="★" if is_fav else "☆", width=25,
                 command=_make_toggle_btn(key),
                 fg_color="transparent", text_color="#f0b429", hover_color="#e09400")
-            star_btn.grid(row=row, column=0, padx=0, pady=1, sticky="e")
+            star_btn.grid(row=row, column=0, padx=0, pady=1, sticky="w")
             btn = ctk.CTkButton(
                 self.proj_dropdown, text=item, anchor="w",
                 command=lambda t=item: self._select_project(t),
                 fg_color="transparent", text_color=("black", "white"),
                 hover_color="#3a7bc8", height=25)
-            btn.grid(row=row, column=0, padx=(0, 30), pady=1, sticky="we")
+            btn.grid(row=row, column=1, padx=(2, 0), pady=1, sticky="we")
             row += 1
         self.proj_dropdown.place(in_=self.proj_entry, x=0, rely=1, relx=0,
                                  y=3, anchor="nw")
@@ -1041,6 +1043,8 @@ class JiraCreateUSFrame(ctk.CTkFrame):
     def _show_epic_dd(self, items):
         for w in self.epic_dropdown.winfo_children():
             w.destroy()
+        self.epic_dropdown.grid_columnconfigure(0, minsize=30)
+        self.epic_dropdown.grid_columnconfigure(1, weight=1)
         row = 0
         for item in items:
             key = self.all_epics.get(item, "")
@@ -1058,13 +1062,13 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                 self.epic_dropdown, text="★" if is_fav else "☆", width=25,
                 command=_make_toggle_btn(key, item),
                 fg_color="transparent", text_color="#f0b429", hover_color="#e09400")
-            star_btn.grid(row=row, column=0, padx=0, pady=1, sticky="e")
+            star_btn.grid(row=row, column=0, padx=0, pady=1, sticky="w")
             btn = ctk.CTkButton(
                 self.epic_dropdown, text=item, anchor="w",
                 command=lambda t=item: self._select_epic(t),
                 fg_color="transparent", text_color=("black", "white"),
                 hover_color="#3a7bc8", height=25)
-            btn.grid(row=row, column=0, padx=(0, 30), pady=1, sticky="we")
+            btn.grid(row=row, column=1, padx=(2, 0), pady=1, sticky="we")
             row += 1
         self.epic_dropdown.place(in_=self.epic_entry, x=0, rely=1, relx=0,
                                  y=3, anchor="nw")

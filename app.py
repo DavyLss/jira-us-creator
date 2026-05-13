@@ -541,7 +541,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
 
         # Dropdown projet
         self.proj_dropdown = ctk.CTkScrollableFrame(
-            self.scrollable, height=150, width=300)
+            self, height=150, width=300)
         self.proj_dropdown.place_forget()
 
         # --- Row 2 : Favoris projets ---
@@ -566,7 +566,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
 
         # Dropdown epic
         self.epic_dropdown = ctk.CTkScrollableFrame(
-            self.scrollable, height=150, width=400)
+            self, height=150, width=400)
         self.epic_dropdown.place_forget()
 
         # --- Row 4 : Favoris epics ---
@@ -610,7 +610,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.ticket_type_entry.bind("<FocusOut>",
                                     lambda e: self.after(200, self._hide_ticket_type_dd))
         self.ticket_type_dropdown = ctk.CTkFrame(
-            self.scrollable, height=120, width=200, corner_radius=6)
+            self, height=120, width=200, corner_radius=6)
         self.ticket_type_dropdown.place_forget()
 
         # --- Row 8 : Type UST ---
@@ -627,7 +627,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.ust_type_entry.bind("<FocusOut>",
                                  lambda e: self.after(200, self._hide_ust_type_dd))
         self.ust_type_dropdown = ctk.CTkFrame(
-            self.scrollable, height=120, width=200, corner_radius=6)
+            self, height=120, width=200, corner_radius=6)
         self.ust_type_dropdown.place_forget()
 
         # --- Row 9 : Tâche OPS ---
@@ -646,7 +646,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                  lambda e: self.after(200, self._hide_task_ops_dd))
 
         self.task_ops_dropdown = ctk.CTkScrollableFrame(
-            self.scrollable, height=150, width=400)
+            self, height=150, width=400)
         self.task_ops_dropdown.place_forget()
 
         # --- Row 10 : Story Points ---
@@ -663,7 +663,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.story_points_entry.bind("<FocusOut>",
                                      lambda e: self.after(200, self._hide_story_points_dd))
         self.story_points_dropdown = ctk.CTkFrame(
-            self.scrollable, height=167, width=80, corner_radius=6)
+            self, height=167, width=80, corner_radius=6)
         self.story_points_dropdown.place_forget()
 
         self.auto_sp_btn = ctk.CTkButton(
@@ -686,7 +686,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.priority_entry.bind("<FocusOut>",
                                  lambda e: self.after(200, self._hide_priority_dd))
         self.priority_dropdown = ctk.CTkFrame(
-            self.scrollable, height=100, width=150, corner_radius=6)
+            self, height=100, width=150, corner_radius=6)
         self.priority_dropdown.place_forget()
 
         # --- Row 12 : Composants ---
@@ -703,7 +703,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.component_entry.bind("<FocusOut>",
                                   lambda e: self.after(200, self._hide_component_dd))
         self.component_dropdown = ctk.CTkScrollableFrame(
-            self.scrollable, height=120, width=200)
+            self, height=120, width=200)
         self.component_dropdown.place_forget()
 
         # --- Row 13 : Sprint actif ---

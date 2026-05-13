@@ -516,44 +516,46 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         ctk.CTkLabel(self.result_frame, text=text, text_color=color).pack()
 
     def _build(self):
-        self.grid_columnconfigure(1, weight=1)
+        self.scrollable = ctk.CTkScrollableFrame(self)
+        self.scrollable.pack(fill="both", expand=True)
+        self.scrollable.grid_columnconfigure(1, weight=1)
 
-        ctk.CTkLabel(self, text="Créer une User Story",
+        ctk.CTkLabel(self.scrollable, text="Créer une User Story",
                      font=ctk.CTkFont(size=20, weight="bold")).grid(
             row=0, column=0, columnspan=3, padx=20, pady=20, sticky="w")
 
         # --- Row 1 : Projet ---
-        ctk.CTkLabel(self, text="Projet:").grid(
+        ctk.CTkLabel(self.scrollable, text="Projet:").grid(
             row=1, column=0, padx=20, pady=8, sticky="w")
         self.proj_var = ctk.StringVar()
         self.proj_entry = ctk.CTkEntry(
-            self, width=300, textvariable=self.proj_var,
+            self.scrollable, width=300, textvariable=self.proj_var,
             placeholder_text="Tapez pour chercher un projet...")
         self.proj_entry.grid(row=1, column=1, padx=10, pady=8, sticky="w")
         self.proj_entry.bind("<KeyRelease>", self._filter_projects)
         self.proj_entry.bind("<FocusOut>",
                              lambda e: self.after(200, self._hide_proj_dd))
         self.proj_refresh_btn = ctk.CTkButton(
-            self, text="↻", width=30, command=self._load_all_projects)
+            self.scrollable, text="↻", width=30, command=self._load_all_projects)
         self.proj_refresh_btn.grid(row=1, column=2, padx=5, sticky="w")
 
         # Dropdown projet
         self.proj_dropdown = ctk.CTkScrollableFrame(
-            self, height=150, width=300)
+            self.scrollable, height=150, width=300)
         self.proj_dropdown.place_forget()
 
         # --- Row 2 : Favoris projets ---
-        self.proj_fav_frame = ctk.CTkFrame(self, height=26, width=500)
+        self.proj_fav_frame = ctk.CTkFrame(self.scrollable, height=26, width=500)
         self.proj_fav_frame.grid(row=2, column=1, columnspan=2, padx=10, pady=0,
                                  sticky="we")
         self.proj_fav_frame.grid_propagate(False)
 
         # --- Row 3 : Epic Link ---
-        ctk.CTkLabel(self, text="Epic Link:").grid(
+        ctk.CTkLabel(self.scrollable, text="Epic Link:").grid(
             row=3, column=0, padx=20, pady=8, sticky="w")
         self.epic_var = ctk.StringVar()
         self.epic_entry = ctk.CTkEntry(
-            self, width=400, textvariable=self.epic_var,
+            self.scrollable, width=400, textvariable=self.epic_var,
             placeholder_text="Sélectionnez d'abord un projet",
             state="disabled")
         self.epic_entry.grid(row=3, column=1, columnspan=2, padx=10, pady=8,
@@ -564,27 +566,27 @@ class JiraCreateUSFrame(ctk.CTkFrame):
 
         # Dropdown epic
         self.epic_dropdown = ctk.CTkScrollableFrame(
-            self, height=150, width=400)
+            self.scrollable, height=150, width=400)
         self.epic_dropdown.place_forget()
 
         # --- Row 4 : Favoris epics ---
-        self.epic_fav_frame = ctk.CTkFrame(self, height=26, width=500)
+        self.epic_fav_frame = ctk.CTkFrame(self.scrollable, height=26, width=500)
         self.epic_fav_frame.grid(row=4, column=1, columnspan=2, padx=10, pady=0,
                                  sticky="we")
         self.epic_fav_frame.grid_propagate(False)
 
         # --- Row 5 : Titre ---
-        ctk.CTkLabel(self, text="Titre:").grid(
+        ctk.CTkLabel(self.scrollable, text="Titre:").grid(
             row=5, column=0, padx=20, pady=8, sticky="w")
-        self.title_entry = ctk.CTkEntry(self, width=500,
+        self.title_entry = ctk.CTkEntry(self.scrollable, width=500,
             placeholder_text="[RESSOURCE][ELEMENT (facultatif)][DC][ENVIRONNEMENT] Résumé des actions")
         self.title_entry.grid(row=5, column=1, columnspan=2, padx=10, pady=8,
                               sticky="we")
 
         # --- Row 6 : Description ---
-        ctk.CTkLabel(self, text="Description:").grid(
+        ctk.CTkLabel(self.scrollable, text="Description:").grid(
             row=6, column=0, padx=20, pady=8, sticky="nw")
-        self.desc_text = ctk.CTkTextbox(self, height=160, width=500)
+        self.desc_text = ctk.CTkTextbox(self.scrollable, height=160, width=500)
         self.desc_text.insert(
             "1.0", "En tant que DevOps, je veux \"OBJECTIF\" afin de \"BENEFICE ATTENDU\".\n\n"
                     "Contraintes techniques : \"OUTIL OU TECHNOLOGIE\"\n"
@@ -595,11 +597,11 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                             sticky="we")
 
         # --- Row 7 : Type de ticket ---
-        ctk.CTkLabel(self, text="Type de ticket:").grid(
+        ctk.CTkLabel(self.scrollable, text="Type de ticket:").grid(
             row=7, column=0, padx=20, pady=8, sticky="w")
         self.ticket_type_var = ctk.StringVar(value="User Story Technique")
         self.ticket_type_entry = ctk.CTkEntry(
-            self, width=200, textvariable=self.ticket_type_var,
+            self.scrollable, width=200, textvariable=self.ticket_type_var,
             placeholder_text="Tapez pour chercher...")
         self.ticket_type_entry.grid(row=7, column=1, padx=10, pady=8, sticky="w")
         self.ticket_type_entry.bind("<KeyRelease>", self._filter_ticket_type)
@@ -608,15 +610,15 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.ticket_type_entry.bind("<FocusOut>",
                                     lambda e: self.after(200, self._hide_ticket_type_dd))
         self.ticket_type_dropdown = ctk.CTkFrame(
-            self, height=120, width=200, corner_radius=6)
+            self.scrollable, height=120, width=200, corner_radius=6)
         self.ticket_type_dropdown.place_forget()
 
         # --- Row 8 : Type UST ---
-        ctk.CTkLabel(self, text="Type UST:").grid(
+        ctk.CTkLabel(self.scrollable, text="Type UST:").grid(
             row=8, column=0, padx=20, pady=8, sticky="w")
         self.ust_type_var = ctk.StringVar(value="UST Ops")
         self.ust_type_entry = ctk.CTkEntry(
-            self, width=200, textvariable=self.ust_type_var,
+            self.scrollable, width=200, textvariable=self.ust_type_var,
             placeholder_text="Tapez pour chercher...")
         self.ust_type_entry.grid(row=8, column=1, padx=10, pady=8, sticky="w")
         self.ust_type_entry.bind("<KeyRelease>", self._filter_ust_type)
@@ -625,15 +627,15 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.ust_type_entry.bind("<FocusOut>",
                                  lambda e: self.after(200, self._hide_ust_type_dd))
         self.ust_type_dropdown = ctk.CTkFrame(
-            self, height=120, width=200, corner_radius=6)
+            self.scrollable, height=120, width=200, corner_radius=6)
         self.ust_type_dropdown.place_forget()
 
         # --- Row 9 : Tâche OPS ---
-        ctk.CTkLabel(self, text="Tâche OPS:").grid(
+        ctk.CTkLabel(self.scrollable, text="Tâche OPS:").grid(
             row=9, column=0, padx=20, pady=8, sticky="w")
         self.task_ops_var = ctk.StringVar(value="AUTO - Agir sur les pipelines de déploiement")
         self.task_ops_entry = ctk.CTkEntry(
-            self, width=400, textvariable=self.task_ops_var,
+            self.scrollable, width=400, textvariable=self.task_ops_var,
             placeholder_text="Tapez pour chercher une tâche OPS...")
         self.task_ops_entry.grid(row=9, column=1, columnspan=2, padx=10, pady=8,
                                  sticky="we")
@@ -644,15 +646,15 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                  lambda e: self.after(200, self._hide_task_ops_dd))
 
         self.task_ops_dropdown = ctk.CTkScrollableFrame(
-            self, height=150, width=400)
+            self.scrollable, height=150, width=400)
         self.task_ops_dropdown.place_forget()
 
         # --- Row 10 : Story Points ---
-        ctk.CTkLabel(self, text="Story Points:").grid(
+        ctk.CTkLabel(self.scrollable, text="Story Points:").grid(
             row=10, column=0, padx=20, pady=8, sticky="w")
         self.story_points_var = ctk.StringVar()
         self.story_points_entry = ctk.CTkEntry(
-            self, width=80, textvariable=self.story_points_var,
+            self.scrollable, width=80, textvariable=self.story_points_var,
             placeholder_text="SP")
         self.story_points_entry.grid(row=10, column=1, padx=10, pady=8, sticky="w")
         self.story_points_entry.bind("<KeyRelease>", self._filter_story_points)
@@ -661,21 +663,21 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.story_points_entry.bind("<FocusOut>",
                                      lambda e: self.after(200, self._hide_story_points_dd))
         self.story_points_dropdown = ctk.CTkFrame(
-            self, height=167, width=80, corner_radius=6)
+            self.scrollable, height=167, width=80, corner_radius=6)
         self.story_points_dropdown.place_forget()
 
         self.auto_sp_btn = ctk.CTkButton(
-            self, text="Auto", width=50,
+            self.scrollable, text="Auto", width=50,
             command=self._show_sp_estimator,
             fg_color="#8b5cf6", hover_color="#7c3aed")
         self.auto_sp_btn.grid(row=10, column=2, padx=(0, 10), sticky="w")
 
         # --- Row 11 : Priorité ---
-        ctk.CTkLabel(self, text="Priorité:").grid(
+        ctk.CTkLabel(self.scrollable, text="Priorité:").grid(
             row=11, column=0, padx=20, pady=8, sticky="w")
         self.priority_var = ctk.StringVar()
         self.priority_entry = ctk.CTkEntry(
-            self, width=150, textvariable=self.priority_var,
+            self.scrollable, width=150, textvariable=self.priority_var,
             placeholder_text="Tapez pour chercher...")
         self.priority_entry.grid(row=11, column=1, padx=10, pady=8, sticky="w")
         self.priority_entry.bind("<KeyRelease>", self._filter_priority)
@@ -684,15 +686,15 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.priority_entry.bind("<FocusOut>",
                                  lambda e: self.after(200, self._hide_priority_dd))
         self.priority_dropdown = ctk.CTkFrame(
-            self, height=100, width=150, corner_radius=6)
+            self.scrollable, height=100, width=150, corner_radius=6)
         self.priority_dropdown.place_forget()
 
         # --- Row 12 : Composants ---
-        ctk.CTkLabel(self, text="Composant:").grid(
+        ctk.CTkLabel(self.scrollable, text="Composant:").grid(
             row=12, column=0, padx=20, pady=8, sticky="w")
         self.component_var = ctk.StringVar()
         self.component_entry = ctk.CTkEntry(
-            self, width=200, textvariable=self.component_var,
+            self.scrollable, width=200, textvariable=self.component_var,
             placeholder_text="Sélectionnez d'abord un projet...")
         self.component_entry.grid(row=12, column=1, padx=10, pady=8, sticky="w")
         self.component_entry.bind("<KeyRelease>", self._filter_components)
@@ -701,26 +703,26 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.component_entry.bind("<FocusOut>",
                                   lambda e: self.after(200, self._hide_component_dd))
         self.component_dropdown = ctk.CTkScrollableFrame(
-            self, height=120, width=200)
+            self.scrollable, height=120, width=200)
         self.component_dropdown.place_forget()
 
         # --- Row 13 : Sprint actif ---
         self.sprint_var = ctk.BooleanVar(value=False)
         self.sprint_cb = ctk.CTkCheckBox(
-            self, text="Ajouter au sprint actif",
+            self.scrollable, text="Ajouter au sprint actif",
             variable=self.sprint_var)
         self.sprint_cb.grid(row=13, column=0, columnspan=2, padx=20, pady=5, sticky="w")
-        self.sprint_lbl = ctk.CTkLabel(self, text="", text_color="gray", font=ctk.CTkFont(size=10))
+        self.sprint_lbl = ctk.CTkLabel(self.scrollable, text="", text_color="gray", font=ctk.CTkFont(size=10))
         self.sprint_lbl.grid(row=13, column=2, padx=10, pady=5, sticky="w")
 
         # --- Row 14 : Bouton ---
         self.create_btn = ctk.CTkButton(
-            self, text="Créer la User Story",
+            self.scrollable, text="Créer la User Story",
             command=self._create_us, fg_color="#2b6cb0", hover_color="#2c5282")
         self.create_btn.grid(row=14, column=0, columnspan=3, padx=20, pady=15)
 
         # --- Row 15 : Résultat ---
-        self.result_frame = ctk.CTkFrame(self)
+        self.result_frame = ctk.CTkFrame(self.scrollable)
         self.result_frame.grid(row=15, column=0, columnspan=3, padx=20, pady=5,
                                sticky="we")
 

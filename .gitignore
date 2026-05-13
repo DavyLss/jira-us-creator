@@ -7,3 +7,4 @@ test_*.py
 dist/
 build/
 *.spec
+contexte.md

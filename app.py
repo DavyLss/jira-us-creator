@@ -131,6 +131,8 @@ class JiraConfigFrame(ctk.CTkFrame):
             self.status_lbl.configure(text=f"Connecté en tant que {name}")
             self.load_projects_btn.configure(state="normal")
             self._load_projects_gui()
+            if self.on_saved:
+                self.after(100, self.on_saved)
         else:
             self.jira = None
             self.status_lbl.configure(text_color="red")

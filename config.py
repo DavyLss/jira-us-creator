@@ -18,6 +18,7 @@ DEFAULT_CONFIG = {
     "verify_ssl": False,
     "favorite_projects": [],
     "favorite_epics": {},
+
     "template_us": {
         "description": "En tant que DevOps, je veux \"OBJECTIF\" afin de \"BENEFICE ATTENDU\".\n\nContraintes techniques : \"OUTIL OU TECHNOLOGIE\"\nContraintes fonctionnelles :\nCritères d'acceptations : ",
         "acceptance_criteria": "* Critère 1 : \n* Critère 2 : \n* Critère 3 : "

@@ -6,7 +6,7 @@ import threading
 import urllib.request
 import json
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.3.0"
 GITHUB_RELEASES_URL = "https://api.github.com/repos/DavyLss/jira-us-creator/releases/latest"
 GITHUB_RELEASES_PAGE = "https://github.com/DavyLss/jira-us-creator/releases/latest"
 
@@ -61,39 +61,22 @@ class JiraConfigFrame(ctk.CTkFrame):
         self.status_lbl = ctk.CTkLabel(self, text="", text_color="gray")
         self.status_lbl.grid(row=5, column=0, columnspan=3, padx=20, pady=5)
 
-        ctk.CTkLabel(self, text="Projets favoris:",
-                     font=ctk.CTkFont(size=16, weight="bold")).grid(
-            row=6, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
-
-        self.proj_frame = ctk.CTkScrollableFrame(self, height=150, width=550)
-        self.proj_frame.grid(row=7, column=0, columnspan=3, padx=20, pady=5,
-                             sticky="nsew")
-        self.proj_frame.grid_columnconfigure(0, weight=1)
-
-        self.load_projects_btn = ctk.CTkButton(
-            self, text="Charger les projets",
-            command=self._load_projects_gui, state="disabled")
-        self.load_projects_btn.grid(row=8, column=0, columnspan=3, padx=20,
-                                    pady=5)
-
         self.update_btn = ctk.CTkButton(
             self, text="Vérifier les mises à jour", width=180,
             command=lambda: check_for_updates(self),
             fg_color="#5b8af5", hover_color="#3a6fd4")
-        self.update_btn.grid(row=9, column=0, columnspan=3, padx=20, pady=5)
+        self.update_btn.grid(row=6, column=0, columnspan=3, padx=20, pady=5)
 
         self.auto_save_var = ctk.BooleanVar(value=True)
         ctk.CTkCheckBox(self, text="Sauvegarde automatique",
                         variable=self.auto_save_var).grid(
-            row=10, column=0, columnspan=3, padx=20, pady=5, sticky="w")
+            row=7, column=0, columnspan=3, padx=20, pady=5, sticky="w")
 
         self.uninstall_btn = ctk.CTkButton(
             self, text="Désinstaller", width=120,
             command=self._uninstall,
             fg_color="#c0392b", hover_color="#e74c3c")
-        self.uninstall_btn.grid(row=11, column=0, columnspan=3, padx=20, pady=10)
-
-        self._populate_projects()
+        self.uninstall_btn.grid(row=8, column=0, columnspan=3, padx=20, pady=10)
 
     def _toggle_token(self):
         show = self.token_entry.cget("show") == ""
@@ -129,63 +112,27 @@ class JiraConfigFrame(ctk.CTkFrame):
             save_config(self.config)
             self.status_lbl.configure(text_color="green")
             self.status_lbl.configure(text=f"Connecté en tant que {name}")
-            self.load_projects_btn.configure(state="normal")
-            self._load_projects_gui()
+            self._load_all_projects()
         else:
             self.jira = None
             self.status_lbl.configure(text_color="red")
             self.status_lbl.configure(text=f"Échec: {info}")
-            self.load_projects_btn.configure(state="disabled")
 
-    def _load_projects_gui(self):
-        if not self.jira:
-            return
-        self.load_projects_btn.configure(state="disabled", text="Chargement...")
-        threading.Thread(target=self._do_load_projects, daemon=True).start()
+    def _load_all_projects(self):
+        if self.jira:
+            threading.Thread(target=self._do_load_projects, daemon=True).start()
 
     def _do_load_projects(self):
-        projects = self.jira.get_projects()
-        self.after(0, self._projects_loaded, projects)
+        try:
+            projects = self.jira.get_projects()
+            if projects:
+                self.after(0, self._projects_loaded, projects)
+        except Exception:
+            pass
 
     def _projects_loaded(self, projects):
-        self.load_projects_btn.configure(state="normal", text="Recharger les projets")
-        for widget in self.proj_frame.winfo_children():
-            widget.destroy()
-        if not projects:
-            ctk.CTkLabel(self.proj_frame, text="Aucun projet trouvé").grid(
-                row=0, column=0, padx=5, pady=5, sticky="w")
-            return
-        favs = self.config.get("favorite_projects", [])
-        for i, proj in enumerate(projects):
-            var = ctk.BooleanVar(value=proj["key"] in favs)
-            var.trace_add("write", self._on_fav_change)
-            chk = ctk.CTkCheckBox(self.proj_frame,
-                                  text=f"{proj['key']} - {proj['name']}",
-                                  variable=var)
-            chk.var = var
-            chk.project_key = proj["key"]
-            chk.grid(row=i, column=0, padx=5, pady=2, sticky="w")
-
-    def _populate_projects(self):
-        favs = self.config.get("favorite_projects", [])
-        for i, key in enumerate(favs):
-            var = ctk.BooleanVar(value=True)
-            var.trace_add("write", self._on_fav_change)
-            chk = ctk.CTkCheckBox(self.proj_frame,
-                                  text=f"{key} (sauvegardé)", variable=var)
-            chk.var = var
-            chk.project_key = key
-            chk.grid(row=i, column=0, padx=5, pady=2, sticky="w")
-
-    def _on_fav_change(self, *args):
-        if not self.auto_save_var.get():
-            return
-        favs = []
-        for widget in self.proj_frame.winfo_children():
-            if isinstance(widget, ctk.CTkCheckBox) and hasattr(widget, "project_key") and widget.var.get():
-                favs.append(widget.project_key)
-        self.config["favorite_projects"] = favs
-        save_config(self.config)
+        n = len(projects)
+        self.status_lbl.configure(text=f"{n} projet(s) chargé(s)", text_color="green")
 
     def _uninstall(self):
         import sys
@@ -237,50 +184,6 @@ class UpdateCheckPopup(ctk.CTkToplevel):
             self, text="Plus tard", text_color="gray",
             fg_color="transparent", hover_color="gray",
             command=self.destroy).pack()
-
-    def _open_url(self, url):
-        import webbrowser
-        webbrowser.open(url)
-        self.destroy()
-
-
-class UpToDatePopup(ctk.CTkToplevel):
-    def __init__(self, master, version):
-        super().__init__(master)
-        self.title("Mise à jour")
-        self.geometry("350x180")
-        self.resizable(False, False)
-        self.transient(master)
-        self.grab_set()
-        ctk.CTkLabel(self, text="Vous êtes à jour",
-                     font=ctk.CTkFont(size=18, weight="bold"),
-                     text_color="#4ade80").pack(pady=(30, 10))
-        ctk.CTkLabel(self, text=f"Version {version} - Dernière version installée",
-                     text_color="gray").pack()
-        ctk.CTkButton(self, text="OK", command=self.destroy).pack(pady=20)
-        self.lift()
-        self.focus_force()
-
-
-def check_for_updates(master, callback=None):
-    def _do_check():
-        try:
-            req = urllib.request.Request(GITHUB_RELEASES_URL)
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = json.loads(resp.read().decode())
-                latest_tag = data.get("tag_name", "").lstrip("v")
-                download_url = data.get("html_url", GITHUB_RELEASES_PAGE)
-                notes = data.get("body", "")
-                if latest_tag and _newer_version(latest_tag, APP_VERSION):
-                    master.after(0, lambda: UpdateCheckPopup(
-                        master, APP_VERSION, latest_tag, download_url, notes))
-                elif callback:
-                    master.after(0, lambda: UpToDatePopup(master, APP_VERSION))
-        except Exception as e:
-            master.after(0, lambda: messagebox.showerror(
-                "Erreur", f"Impossible de vérifier les mises à jour :\n{e}"))
-    threading.Thread(target=_do_check, daemon=True).start()
-
 
 def _newer_version(latest, current):
     def _parse(v):
@@ -559,7 +462,9 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             "SURV - Interagir sur une/des surveillance technique",
         ]
         self.all_ticket_types = [
-            "User Story Technique", "UST Ops", "User Story", "Bug", "Task"
+            "User Story Technique", "User Story", "Feature", "Anomalie (AGILE)",
+            "Risque", "Demande de support", "Test", "Test Set",
+            "Test Execution", "Pre-Condition", "Test Plan", "Incident"
         ]
         self.all_ust_types = [
             "User Story Technique", "UST Ops", "UST Sécurité"
@@ -581,7 +486,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self._epic_search_after = None
         self._epic_search_thread = None
         self._build()
-        self._connect()
+        self.after(10, self._connect)
 
     def _connect(self):
         url = self.config.get("jira_url")
@@ -589,17 +494,21 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         verify = self.config.get("verify_ssl", True)
         if url and token:
             self.jira = JiraAPI(url, token, verify)
-            ok, user, _ = self.jira.test_connection()
-            if ok:
-                self.after(0, lambda: self._show_status(
-                    f"Connecté en tant que {user}", "green"))
-                self._load_all_projects()
-                self._load_template()
-            else:
-                self.after(0, lambda: self._show_status(
-                    "Erreur de connexion — vérifiez la configuration", "red"))
-        self._render_proj_favs()
-        self._render_epic_favs()
+            threading.Thread(target=self._do_connect, daemon=True).start()
+        else:
+            self.after(0, self._render_proj_favs)
+            self.after(0, self._render_epic_favs)
+
+    def _do_connect(self):
+        ok, user, _ = self.jira.test_connection()
+        if ok:
+            self.after(0, lambda: self._show_status(f"Connecté en tant que {user}", "green"))
+            self.after(0, self._load_all_projects)
+            self.after(0, self._load_template)
+        else:
+            self.after(0, lambda: self._show_status("Erreur de connexion — vérifiez la configuration", "red"))
+        self.after(0, self._render_proj_favs)
+        self.after(0, self._render_epic_favs)
 
     def _show_status(self, text, color):
         for w in self.result_frame.winfo_children():
@@ -702,7 +611,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             self, height=120, width=200, corner_radius=6)
         self.ticket_type_dropdown.place_forget()
 
-        # --- Row 7b : Type User Story Technique ---
+        # --- Row 8 : Type UST ---
         ctk.CTkLabel(self, text="Type UST:").grid(
             row=8, column=0, padx=20, pady=8, sticky="w")
         self.ust_type_var = ctk.StringVar(value="UST Ops")
@@ -719,7 +628,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
             self, height=120, width=200, corner_radius=6)
         self.ust_type_dropdown.place_forget()
 
-        # --- Row 9 : Tâche OPS à réaliser ---
+        # --- Row 9 : Tâche OPS ---
         ctk.CTkLabel(self, text="Tâche OPS:").grid(
             row=9, column=0, padx=20, pady=8, sticky="w")
         self.task_ops_var = ctk.StringVar(value="AUTO - Agir sur les pipelines de déploiement")
@@ -730,7 +639,7 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                  sticky="we")
         self.task_ops_entry.bind("<KeyRelease>", self._filter_task_ops)
         self.task_ops_entry.bind("<FocusIn>",
-                                 lambda e: self.after(100, self._show_task_ops_dd, sorted(self.all_task_ops)[:30]))
+                                 lambda e: self.after(100, self._show_task_ops_dd, sorted(self.all_task_ops)))
         self.task_ops_entry.bind("<FocusOut>",
                                  lambda e: self.after(200, self._hide_task_ops_dd))
 
@@ -907,6 +816,11 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                  y=3, anchor="nw")
         self.proj_dropdown.lift()
 
+    def _select_project(self, label):
+        self.proj_var.set(label)
+        self._hide_proj_dd()
+        self._on_project_change(label)
+
     def _toggle_proj_fav(self, key):
         favs = set(self.config.get("favorite_projects", []))
         if key in favs:
@@ -919,11 +833,6 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         search = self.proj_var.get().lower().strip()
         if search:
             threading.Thread(target=self._do_search_projects, args=(search,), daemon=True).start()
-
-    def _select_project(self, label):
-        self.proj_var.set(label)
-        self._hide_proj_dd()
-        self._on_project_change(label)
 
     def _render_proj_favs(self):
         for w in self.proj_fav_frame.winfo_children():
@@ -989,7 +898,12 @@ class JiraCreateUSFrame(ctk.CTkFrame):
         self.sprint_lbl.configure(text="")
         proj_key = self.all_projects.get(value, "")
         if proj_key:
+            self.task_ops_entry.configure(placeholder_text="Chargement...")
             threading.Thread(target=self._do_load_components_and_sprint,
+                             args=(proj_key,), daemon=True).start()
+            threading.Thread(target=self._do_load_task_ops,
+                             args=(proj_key,), daemon=True).start()
+            threading.Thread(target=self._do_load_issue_types,
                              args=(proj_key,), daemon=True).start()
 
     def _do_load_components_and_sprint(self, proj_key):
@@ -1016,6 +930,31 @@ class JiraCreateUSFrame(ctk.CTkFrame):
 
     def _components_error(self, err):
         self.component_entry.configure(placeholder_text="Erreur chargement")
+
+    def _do_load_task_ops(self, proj_key):
+        try:
+            ops = self.jira.get_task_ops(proj_key)
+            if ops:
+                self.after(0, self._task_ops_loaded, ops)
+        except Exception:
+            pass
+
+    def _task_ops_loaded(self, ops):
+        self.all_task_ops = ops
+        self.task_ops_entry.configure(placeholder_text="Tapez pour chercher une tâche OPS...")
+
+    def _do_load_issue_types(self, proj_key):
+        try:
+            types = self.jira.get_issue_types(proj_key)
+            if types:
+                self.after(0, self._issue_types_loaded, types)
+        except Exception:
+            pass
+
+    def _issue_types_loaded(self, types):
+        self.all_ticket_types = types
+        if self.ticket_type_var.get() not in types:
+            self.ticket_type_var.set("")
 
     def _search_epics(self, search_text=""):
         self._epic_search_thread = None
@@ -1129,6 +1068,10 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                                  y=3, anchor="nw")
         self.epic_dropdown.lift()
 
+    def _select_epic(self, label):
+        self.epic_var.set(label)
+        self._hide_epic_dd()
+
     def _toggle_epic_fav(self, key, summary):
         fav_epics = self.config.get("favorite_epics", {})
         if isinstance(fav_epics, list):
@@ -1148,10 +1091,6 @@ class JiraCreateUSFrame(ctk.CTkFrame):
                 fav_items = [k for k in filtered if self.all_epics.get(k) in fav_epics]
                 other_items = [k for k in filtered if self.all_epics.get(k) not in fav_epics]
                 self._show_epic_dd(fav_items + other_items)
-
-    def _select_epic(self, label):
-        self.epic_var.set(label)
-        self._hide_epic_dd()
 
     def _render_epic_favs(self):
         for w in self.epic_fav_frame.winfo_children():
@@ -1599,11 +1538,28 @@ class JiraUSApp(ctk.CTk):
         self.create_frame = JiraCreateUSFrame(self.tab_create, self.config)
         self.create_frame.pack(fill="both", expand=True)
 
+        # Hook tab changes (both clicks and programmatic set())
+        self.tabview._command = lambda: self.after(50, self._resize_to_fit)
+        original_set = self.tabview.set
+        def _on_set(name):
+            original_set(name)
+            self.after(50, self._resize_to_fit)
+        self.tabview.set = _on_set
+
         has_token = bool(self.config.get("jira_token", "").strip())
         if has_token:
             self.tabview.set("Créer User Story")
 
-        self.after(3000, lambda: check_for_updates(self, callback=True))
+        self.after(100, self._resize_to_fit)
+        self.after(3000, lambda: check_for_updates(self))
+
+    def _resize_to_fit(self):
+        self.update_idletasks()
+        current = self.tabview.get()
+        tab = self.tabview.tab(current)
+        h = tab.winfo_reqheight() + 80
+        h = max(500, min(h, 950))
+        self.geometry(f"700x{int(h)}")
 
     def _on_close(self):
         url = self.config_frame.url_entry.get().strip()
@@ -1612,12 +1568,6 @@ class JiraUSApp(ctk.CTk):
             self.config["jira_url"] = url
             self.config["jira_token"] = token
             self.config["verify_ssl"] = self.config_frame.ssl_var.get()
-        cfg_favs = set(self.config.get("favorite_projects", []))
-        ui_favs = set()
-        for w in self.config_frame.proj_frame.winfo_children():
-            if isinstance(w, ctk.CTkCheckBox) and hasattr(w, "project_key") and w.var.get():
-                ui_favs.add(w.project_key)
-        self.config["favorite_projects"] = list(cfg_favs | ui_favs)
         save_config(self.config)
         self.destroy()
 

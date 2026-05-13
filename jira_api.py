@@ -156,6 +156,48 @@ class JiraAPI:
         except Exception:
             pass
 
+    def get_task_ops(self, project_key=None):
+        try:
+            url = f"{self.url}/rest/api/2/search"
+            values = {}
+            start, total = 0, None
+            while total is None or start < total:
+                resp = requests.get(url, headers=self.headers,
+                                    params={"jql": "cf[35353] is not EMPTY",
+                                            "fields": "customfield_35353",
+                                            "maxResults": 200, "startAt": start},
+                                    verify=self.verify, timeout=15)
+                if resp.status_code != 200:
+                    break
+                data = resp.json()
+                total = data.get("total", 0)
+                for issue in data.get("issues", []):
+                    val_obj = issue.get("fields", {}).get("customfield_35353")
+                    if val_obj and isinstance(val_obj, dict):
+                        v = val_obj.get("value", "")
+                        if v:
+                            values[v] = val_obj.get("id", "")
+                start += 200
+                if start >= min(total, 1000):
+                    break
+            return sorted(values.keys())
+        except Exception:
+            return []
+
+    def get_issue_types(self, project_key):
+        try:
+            url = f"{self.url}/rest/api/2/project/{project_key}"
+            resp = requests.get(url, headers=self.headers,
+                                verify=self.verify, timeout=15)
+            if resp.status_code == 200:
+                data = resp.json()
+                types = [it["name"] for it in data.get("issueTypes", [])
+                        if not it.get("subtask", False)]
+                return types
+            return []
+        except Exception:
+            return []
+
     def _add_to_sprint(self, issue_key, sprint_id):
         url = f"{self.url}/rest/agile/1.0/sprint/{sprint_id}/issue"
         payload = {"issues": [issue_key]}
